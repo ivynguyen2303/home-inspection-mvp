@@ -1,0 +1,115 @@
+{
+  "inspectors": [
+    {
+      "id": "1",
+      "name": "Michael Rodriguez",
+      "licenseNumber": "HI-2024-001",
+      "serviceAreas": ["Irvine", "Orange", "Tustin", "Santa Ana"],
+      "basePrice": 450,
+      "experienceYears": 12,
+      "rating": 4.9,
+      "reviewCount": 47,
+      "bio": "With over 12 years of experience in home inspections, I provide thorough, detailed reports to help you make informed decisions about your property purchase. I specialize in both residential and commercial properties, with expertise in newer construction and older homes requiring renovation assessments.",
+      "specialties": ["Structural Assessments", "HVAC Systems", "Electrical Systems", "Plumbing Inspection", "Roof & Exterior", "Foundation Analysis"],
+      "certification": "ASHI Certified",
+      "nextAvailability": "Available tomorrow",
+      "availability": [
+        {
+          "date": "2024-12-15",
+          "dayName": "Tomorrow",
+          "slots": ["9:00 AM - 12:00 PM", "1:00 PM - 4:00 PM"],
+          "status": "available"
+        },
+        {
+          "date": "2024-12-16",
+          "dayName": "Friday",
+          "slots": ["8:00 AM - 11:00 AM", "2:00 PM - 5:00 PM"],
+          "status": "available"
+        },
+        {
+          "date": "2024-12-17",
+          "dayName": "Saturday",
+          "slots": [],
+          "status": "booked"
+        },
+        {
+          "date": "2024-12-19",
+          "dayName": "Monday",
+          "slots": ["8:00 AM - 6:00 PM"],
+          "status": "available"
+        }
+      ],
+      "contact": {
+        "email": "michael@inspectnow.com",
+        "phone": "(714) 555-0123"
+      },
+      "photoUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
+    },
+    {
+      "id": "2",
+      "name": "Sarah Chen",
+      "licenseNumber": "HI-2024-002",
+      "serviceAreas": ["Irvine", "Newport Beach", "Costa Mesa"],
+      "basePrice": 425,
+      "experienceYears": 8,
+      "rating": 5.0,
+      "reviewCount": 32,
+      "bio": "Dedicated to providing comprehensive home inspections with attention to detail. I focus on helping first-time homebuyers understand their property and make informed decisions. My background in construction gives me unique insights into potential issues.",
+      "specialties": ["New Construction", "First-Time Buyer Education", "Energy Efficiency", "Safety Assessments", "Moisture Detection", "Pest Inspection"],
+      "certification": "InterNACHI Certified",
+      "nextAvailability": "Available Friday",
+      "availability": [
+        {
+          "date": "2024-12-16",
+          "dayName": "Friday",
+          "slots": ["9:00 AM - 1:00 PM", "2:00 PM - 6:00 PM"],
+          "status": "available"
+        },
+        {
+          "date": "2024-12-18",
+          "dayName": "Sunday",
+          "slots": ["10:00 AM - 2:00 PM"],
+          "status": "available"
+        }
+      ],
+      "contact": {
+        "email": "sarah@inspectnow.com",
+        "phone": "(949) 555-0156"
+      },
+      "photoUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
+    },
+    {
+      "id": "3",
+      "name": "David Thompson",
+      "licenseNumber": "HI-2024-003",
+      "serviceAreas": ["Irvine", "Anaheim", "Santa Ana", "Fullerton"],
+      "basePrice": 475,
+      "experienceYears": 15,
+      "rating": 4.7,
+      "reviewCount": 89,
+      "bio": "Veteran home inspector with extensive experience in older properties and renovation projects. I provide detailed assessments that help clients understand both current conditions and future maintenance needs. Known for thorough documentation and clear communication.",
+      "specialties": ["Historic Properties", "Renovation Assessment", "Commercial Properties", "Investment Properties", "Code Compliance", "Environmental Testing"],
+      "certification": "NAHI Certified",
+      "nextAvailability": "Available next week",
+      "availability": [
+        {
+          "date": "2024-12-20",
+          "dayName": "Tuesday",
+          "slots": ["8:00 AM - 12:00 PM", "1:00 PM - 5:00 PM"],
+          "status": "available"
+        },
+        {
+          "date": "2024-12-21",
+          "dayName": "Wednesday",
+          "slots": ["9:00 AM - 3:00 PM"],
+          "status": "available"
+        }
+      ],
+      "contact": {
+        "email": "david@inspectnow.com",
+        "phone": "(714) 555-0198"
+      },
+      "photoUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
+    }
+  ]
+}
