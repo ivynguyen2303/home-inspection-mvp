@@ -13,6 +13,22 @@ export default function Landing() {
 
   // Clear all existing data on first load to ensure fresh start
   useEffect(() => {
+    // Clear all possible data keys
+    const keysToRemove = [
+      'inspect_now_data',
+      'inspect_now_auth', 
+      'inspect_now_user',
+      'inspect_now_users',
+      'inspect_now_session',
+      'inspect_now_inspector_profile',
+      'inspect_now_all_inspector_profiles',
+      'inspect_now_requests'
+    ];
+    
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
     clearAllData();
   }, []);
 

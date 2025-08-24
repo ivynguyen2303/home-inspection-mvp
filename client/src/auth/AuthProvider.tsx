@@ -19,7 +19,7 @@ import {
   updateUser,
   hashPassword,
   generateUserId,
-  initializeDemoAccounts
+  clearAllUsers
 } from './storage';
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -40,10 +40,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Initialize session on mount
   useEffect(() => {
-    const initAuth = async () => {
+    const initAuth = () => {
       try {
-        // Initialize demo accounts and wait for completion
-        await initializeDemoAccounts();
+        // Clear all existing data for fresh start
+        clearAllUsers();
         
         const session = getSession();
         if (session) {

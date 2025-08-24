@@ -51,11 +51,6 @@ export default function Login() {
     }
   };
 
-  const fillDemoAccount = (role: 'client' | 'inspector') => {
-    const email = role === 'client' ? 'client_demo@example.com' : 'inspector_demo@example.com';
-    form.setValue('email', email);
-    form.setValue('password', 'DemoPass123');
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -153,37 +148,6 @@ export default function Login() {
               </form>
             </Form>
 
-            {/* Demo Accounts */}
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-muted">Or try a demo account</span>
-                </div>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fillDemoAccount('client')}
-                  className="text-sm"
-                  data-testid="button-demo-client"
-                >
-                  Client Demo
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fillDemoAccount('inspector')}
-                  className="text-sm"
-                  data-testid="button-demo-inspector"
-                >
-                  Inspector Demo
-                </Button>
-              </div>
-            </div>
 
             {/* Sign Up Link */}
             <div className="mt-6 text-center">
