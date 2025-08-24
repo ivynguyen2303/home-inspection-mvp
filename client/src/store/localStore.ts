@@ -35,12 +35,9 @@ export interface InspectorProfile {
   basePrice: number;
 }
 
-export type Role = 'client' | 'inspector';
-
 interface LocalStore {
   requests: Request[];
   inspectorProfile: InspectorProfile;
-  role: Role;
 }
 
 const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
@@ -67,8 +64,7 @@ export function useLocalStore() {
     // Load initial data from example file
     return {
       requests: [],
-      inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
-      role: 'client' as Role
+      inspectorProfile: DEFAULT_INSPECTOR_PROFILE
     };
   });
 
@@ -133,9 +129,6 @@ export function useLocalStore() {
     }));
   };
 
-  const setRole = (role: Role) => {
-    setStore(prev => ({ ...prev, role }));
-  };
 
   const updateInspectorProfile = (updates: Partial<InspectorProfile>) => {
     setStore(prev => ({
@@ -157,10 +150,8 @@ export function useLocalStore() {
   return {
     requests: store.requests,
     inspectorProfile: store.inspectorProfile,
-    role: store.role,
     addRequest,
     toggleInterest,
-    setRole,
     updateInspectorProfile,
     getRequestById,
     getMyInterests
