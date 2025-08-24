@@ -102,12 +102,26 @@ export function useLocalStore() {
 
   // Clear all data function
   const clearAllData = () => {
+    // Clear inspector/request data
     localStorage.removeItem(STORAGE_KEY);
+    // Clear user accounts and sessions 
+    localStorage.removeItem('inspect_now_users');
+    localStorage.removeItem('inspect_now_session');
+    
     setStore({
       requests: [],
       inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
       allInspectorProfiles: []
     });
+    
+    console.log('🧹 ALL DATA CLEARED!');
+    console.log('- User accounts: cleared');
+    console.log('- Sessions: cleared'); 
+    console.log('- Inspector profiles: cleared');
+    console.log('- Requests: cleared');
+    
+    // Force page refresh to show clean state
+    window.location.reload();
   };
 
   // Save to localStorage whenever store changes
