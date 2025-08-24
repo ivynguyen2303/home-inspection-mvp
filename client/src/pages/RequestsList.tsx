@@ -24,7 +24,7 @@ export default function RequestsList() {
         return true;
       })
       .filter(req => {
-        if (propertyTypeFilter) {
+        if (propertyTypeFilter && propertyTypeFilter !== 'all') {
           return req.property.type === propertyTypeFilter;
         }
         return true;
@@ -84,7 +84,7 @@ export default function RequestsList() {
                     <SelectValue placeholder="All property types" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All property types</SelectItem>
+                    <SelectItem value="all">All property types</SelectItem>
                     <SelectItem value="House">House</SelectItem>
                     <SelectItem value="Townhome">Townhome</SelectItem>
                     <SelectItem value="Condo">Condo</SelectItem>
