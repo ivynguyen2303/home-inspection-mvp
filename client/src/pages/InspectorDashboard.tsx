@@ -14,7 +14,12 @@ export default function InspectorDashboard() {
   const { requests, getMyInterests, inspectorProfile } = useLocalStore();
   const [activeTab, setActiveTab] = useState('requests');
   
-  const openRequests = requests.filter(req => req.status === 'open');
+  const openRequests = requests.filter(req => 
+    req.status === 'open' && (
+      req.type === 'open_request' || 
+      (req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id)
+    )
+  );
   const myInterests = getMyInterests();
 
   return (

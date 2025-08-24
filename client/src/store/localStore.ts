@@ -4,6 +4,8 @@ export interface Request {
   id: string;
   createdAt: string;
   status: 'open' | 'matched' | 'closed';
+  type: 'client_request' | 'open_request';
+  targetInspectorId?: string; // Only for client_request type
   client: {
     name: string;
     email: string;
@@ -232,6 +234,8 @@ export function useLocalStore() {
       id: `req_${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'open',
+      type: 'client_request',
+      targetInspectorId: inspectorId,
       client: {
         name: clientData.name,
         email: clientData.email,
@@ -281,6 +285,59 @@ export function useLocalStore() {
     return newRequest.id;
   };
 
+  // Create open request (not tied to specific inspector)
+  const createOpenRequest = (clientData: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    cityZip: string;
+    propertyType: 'House' | 'Townhome' | 'Condo';
+    beds: number;
+    baths: number;
+    sqft?: number;
+    preferredDate: string;
+    altDate?: string;
+    budget?: number;
+    notes?: string;
+  }) => {
+    const newRequest: Request = {
+      id: `req_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      status: 'open',
+      type: 'open_request', // This is an open request for all inspectors
+      client: {
+        name: clientData.name,
+        email: clientData.email,
+        phone: clientData.phone
+      },
+      property: {
+        address: clientData.address,
+        cityZip: clientData.cityZip,
+        type: clientData.propertyType,
+        beds: clientData.beds,
+        baths: clientData.baths,
+        sqft: clientData.sqft
+      },
+      schedule: {
+        preferredDate: clientData.preferredDate,
+        altDate: clientData.altDate
+      },
+      budget: clientData.budget,
+      notes: clientData.notes || '',
+      interestCount: 0,
+      interestedInspectorIds: []
+    };
+
+    // Add the request
+    setStore(prev => ({
+      ...prev,
+      requests: [newRequest, ...prev.requests]
+    }));
+
+    return newRequest.id;
+  };
+
   return {
     requests: store.requests,
     inspectorProfile: store.inspectorProfile,
@@ -294,6 +351,7 @@ export function useLocalStore() {
     getRequestById,
     getMyInterests,
     clearAllData,
-    createBookingFromTimeSlot
+    createBookingFromTimeSlot,
+    createOpenRequest
   };
 }

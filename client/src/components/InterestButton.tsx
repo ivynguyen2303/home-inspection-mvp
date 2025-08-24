@@ -37,7 +37,7 @@ export function InterestButton({ requestId, interestCount, className }: Interest
       </Button>
       {interestCount > 0 && (
         <Badge variant="secondary" className="bg-red-100 text-red-800" data-testid={`badge-interest-count-${requestId}`}>
-          {interestCount} interested
+          {interestCount} ❤
         </Badge>
       )}
     </div>

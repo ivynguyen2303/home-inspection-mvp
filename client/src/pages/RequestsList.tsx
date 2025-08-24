@@ -9,7 +9,7 @@ import { useLocalStore } from '@/store/localStore';
 import { Search, Filter, Briefcase } from 'lucide-react';
 
 export default function RequestsList() {
-  const { requests } = useLocalStore();
+  const { requests, inspectorProfile } = useLocalStore();
   const [cityFilter, setCityFilter] = useState('');
   const [propertyTypeFilter, setPropertyTypeFilter] = useState('');
   const [earliestDateFilter, setEarliestDateFilter] = useState('');
@@ -19,6 +19,15 @@ export default function RequestsList() {
   const filteredRequests = useMemo(() => {
     return requests
       .filter(req => req.status === 'open')
+      .filter(req => {
+        // Show open requests to all inspectors, and client requests only to target inspector
+        if (req.type === 'open_request') {
+          return true; // All inspectors can see open requests
+        } else if (req.type === 'client_request') {
+          return req.targetInspectorId === inspectorProfile.id; // Only target inspector can see
+        }
+        return true;
+      })
       .filter(req => {
         if (cityFilter) {
           return req.property.cityZip.toLowerCase().includes(cityFilter.toLowerCase());
@@ -38,7 +47,7 @@ export default function RequestsList() {
         return true;
       })
       .sort((a, b) => new Date(a.schedule.preferredDate).getTime() - new Date(b.schedule.preferredDate).getTime());
-  }, [requests, cityFilter, propertyTypeFilter, earliestDateFilter]);
+  }, [requests, cityFilter, propertyTypeFilter, earliestDateFilter, inspectorProfile.id]);
 
   return (
     <div className="min-h-screen bg-gray-50">

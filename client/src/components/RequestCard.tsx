@@ -42,6 +42,16 @@ export function RequestCard({ request }: RequestCardProps) {
                   New
                 </Badge>
               )}
+              <Badge 
+                className={`text-xs ${
+                  request.type === 'client_request' 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-purple-100 text-purple-800'
+                }`}
+                data-testid={`badge-request-type-${request.id}`}
+              >
+                {request.type === 'client_request' ? 'Client Request' : 'Open Request'}
+              </Badge>
             </div>
             <p className="text-sm text-muted mb-1" data-testid={`text-request-client-${request.id}`}>
               {request.client.name} • {obfuscateEmail(request.client.email)}
