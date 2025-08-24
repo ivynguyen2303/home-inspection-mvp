@@ -71,6 +71,15 @@ export default function InspectorProfile() {
     }
   });
 
+  // Update form when user data loads
+  useEffect(() => {
+    if (user) {
+      form.setValue('name', user.name || '');
+      form.setValue('email', user.email || '');
+      form.setValue('phone', user.phone || '');
+    }
+  }, [user, form]);
+
   useEffect(() => {
     if (!match || !params?.id) return;
 
@@ -352,9 +361,9 @@ export default function InspectorProfile() {
                             name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Email (from your account)</FormLabel>
                                 <FormControl>
-                                  <Input type="email" {...field} data-testid="input-booking-email" />
+                                  <Input type="email" {...field} data-testid="input-booking-email" readOnly className="bg-gray-50" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

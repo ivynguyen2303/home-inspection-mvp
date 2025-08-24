@@ -153,9 +153,9 @@ export default function PostRequest() {
                       name="clientEmail"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email Address *</FormLabel>
+                          <FormLabel>Email Address * (from your account)</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="your@email.com" {...field} data-testid="input-client-email" />
+                            <Input type="email" placeholder="your@email.com" {...field} data-testid="input-client-email" readOnly className="bg-gray-50" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
