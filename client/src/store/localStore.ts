@@ -344,7 +344,7 @@ export function useLocalStore() {
   };
 
   // Update a request (only if it belongs to the client)
-  const updateRequest = (requestId: string, clientEmail: string, updates: Partial<Omit<Request, 'id' | 'createdAt' | 'client'>>) => {
+  const updateRequest = (requestId: string, clientEmail: string, updates: Partial<Omit<Request, 'id' | 'createdAt'>>) => {
     const request = store.requests.find(r => r.id === requestId);
     if (!request || request.client.email !== clientEmail) {
       throw new Error('Request not found or unauthorized');

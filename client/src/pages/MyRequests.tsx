@@ -18,10 +18,21 @@ import { z } from 'zod';
 import { Calendar, Home, DollarSign, Clock, Edit2, Trash2, FileText, Heart } from 'lucide-react';
 
 const updateRequestSchema = z.object({
+  clientName: z.string().min(1, 'Name is required'),
+  clientEmail: z.string().email('Valid email is required'),
+  clientPhone: z.string().optional(),
+  propertyAddress: z.string().min(1, 'Property address is required'),
+  cityZip: z.string().min(1, 'City and ZIP code are required'),
   preferredDate: z.string().min(1, 'Preferred date is required'),
   altDate: z.string().optional(),
-  budget: z.string().optional(),
+  propertyType: z.enum(['House', 'Townhome', 'Condo'], {
+    required_error: 'Property type is required'
+  }),
+  beds: z.number().min(0, 'Beds must be 0 or greater'),
+  baths: z.number().min(0, 'Baths must be 0 or greater'),
+  sqft: z.number().optional(),
   notes: z.string().optional(),
+  budget: z.number().optional()
 });
 
 type UpdateRequestData = z.infer<typeof updateRequestSchema>;
@@ -49,10 +60,19 @@ export default function MyRequests() {
   const form = useForm<UpdateRequestData>({
     resolver: zodResolver(updateRequestSchema),
     defaultValues: {
+      clientName: '',
+      clientEmail: '',
+      clientPhone: '',
+      propertyAddress: '',
+      cityZip: '',
       preferredDate: '',
       altDate: '',
-      budget: '',
+      propertyType: 'House' as const,
+      beds: 0,
+      baths: 0,
+      sqft: 0,
       notes: '',
+      budget: 0
     },
   });
 
@@ -60,10 +80,19 @@ export default function MyRequests() {
     const request = myRequests.find(r => r.id === requestId);
     if (request) {
       form.reset({
+        clientName: request.client.name,
+        clientEmail: request.client.email,
+        clientPhone: request.client.phone || '',
+        propertyAddress: request.property.address,
+        cityZip: request.property.cityZip,
         preferredDate: request.schedule.preferredDate,
         altDate: request.schedule.altDate || '',
-        budget: request.budget?.toString() || '',
+        propertyType: request.property.type as 'House' | 'Townhome' | 'Condo',
+        beds: request.property.beds,
+        baths: request.property.baths,
+        sqft: request.property.sqft || 0,
         notes: request.notes || '',
+        budget: request.budget || 0
       });
       setEditingRequest(requestId);
     }
@@ -74,11 +103,24 @@ export default function MyRequests() {
 
     try {
       updateRequest(editingRequest, user.email, {
+        client: {
+          name: data.clientName,
+          email: data.clientEmail,
+          phone: data.clientPhone || ''
+        },
+        property: {
+          address: data.propertyAddress,
+          cityZip: data.cityZip,
+          type: data.propertyType,
+          beds: data.beds,
+          baths: data.baths,
+          sqft: data.sqft || undefined
+        },
         schedule: {
           preferredDate: data.preferredDate,
           altDate: data.altDate || undefined,
         },
-        budget: data.budget ? parseInt(data.budget) : undefined,
+        budget: data.budget || undefined,
         notes: data.notes || '',
       });
 
@@ -193,73 +235,254 @@ export default function MyRequests() {
                             <Edit2 className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle>Edit Request</DialogTitle>
                           </DialogHeader>
                           <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmitUpdate)} className="space-y-4">
+                              {/* Client Information */}
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <FormField
+                                  control={form.control}
+                                  name="clientName"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Your Name</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} data-testid="input-edit-client-name" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                
+                                <FormField
+                                  control={form.control}
+                                  name="clientEmail"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Email</FormLabel>
+                                      <FormControl>
+                                        <Input type="email" {...field} data-testid="input-edit-client-email" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
                               <FormField
                                 control={form.control}
-                                name="preferredDate"
+                                name="clientPhone"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Preferred Date</FormLabel>
+                                    <FormLabel>Phone (Optional)</FormLabel>
                                     <FormControl>
-                                      <Input type="datetime-local" {...field} data-testid="input-edit-preferred-date" />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={form.control}
-                                name="altDate"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Alternative Date (Optional)</FormLabel>
-                                    <FormControl>
-                                      <Input type="datetime-local" {...field} data-testid="input-edit-alt-date" />
+                                      <Input type="tel" {...field} data-testid="input-edit-client-phone" />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
                                 )}
                               />
 
-                              <FormField
-                                control={form.control}
-                                name="budget"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Budget (Optional)</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" placeholder="500" {...field} data-testid="input-edit-budget" />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                              {/* Property Information */}
+                              <div className="space-y-4">
+                                <h3 className="text-lg font-semibold text-secondary">Property Details</h3>
+                                
+                                <FormField
+                                  control={form.control}
+                                  name="propertyAddress"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Property Address</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} data-testid="input-edit-property-address" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
 
-                              <FormField
-                                control={form.control}
-                                name="notes"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Notes (Optional)</FormLabel>
-                                    <FormControl>
-                                      <Textarea 
-                                        placeholder="Any additional details..."
-                                        className="resize-none"
-                                        rows={3}
-                                        {...field}
-                                        data-testid="textarea-edit-notes"
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                                <FormField
+                                  control={form.control}
+                                  name="cityZip"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>City, State ZIP</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} data-testid="input-edit-city-zip" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <div className="grid md:grid-cols-2 gap-4">
+                                  <FormField
+                                    control={form.control}
+                                    name="propertyType"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Property Type</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                          <FormControl>
+                                            <SelectTrigger data-testid="select-edit-property-type">
+                                              <SelectValue placeholder="Select property type" />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            <SelectItem value="House">Single Family House</SelectItem>
+                                            <SelectItem value="Townhome">Townhome</SelectItem>
+                                            <SelectItem value="Condo">Condominium</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <FormField
+                                    control={form.control}
+                                    name="sqft"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Square Feet (Optional)</FormLabel>
+                                        <FormControl>
+                                          <Input 
+                                            type="number" 
+                                            {...field} 
+                                            value={field.value || ''} 
+                                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                                            data-testid="input-edit-sqft" 
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <FormField
+                                    control={form.control}
+                                    name="beds"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Bedrooms</FormLabel>
+                                        <FormControl>
+                                          <Input 
+                                            type="number" 
+                                            min="0" 
+                                            {...field} 
+                                            onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                            data-testid="input-edit-beds" 
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <FormField
+                                    control={form.control}
+                                    name="baths"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Bathrooms</FormLabel>
+                                        <FormControl>
+                                          <Input 
+                                            type="number" 
+                                            min="0" 
+                                            step="0.5" 
+                                            {...field} 
+                                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                            data-testid="input-edit-baths" 
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Scheduling */}
+                              <div className="space-y-4">
+                                <h3 className="text-lg font-semibold text-secondary">Inspection Schedule</h3>
+                                
+                                <FormField
+                                  control={form.control}
+                                  name="preferredDate"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Preferred Date & Time</FormLabel>
+                                      <FormControl>
+                                        <Input type="datetime-local" {...field} data-testid="input-edit-preferred-date" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                
+                                <FormField
+                                  control={form.control}
+                                  name="altDate"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Alternative Date & Time (Optional)</FormLabel>
+                                      <FormControl>
+                                        <Input type="datetime-local" {...field} data-testid="input-edit-alt-date" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              {/* Additional Details */}
+                              <div className="space-y-4">
+                                <FormField
+                                  control={form.control}
+                                  name="budget"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Budget (Optional)</FormLabel>
+                                      <FormControl>
+                                        <Input 
+                                          type="number" 
+                                          placeholder="500" 
+                                          {...field} 
+                                          value={field.value || ''} 
+                                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                                          data-testid="input-edit-budget" 
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name="notes"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Additional Notes (Optional)</FormLabel>
+                                      <FormControl>
+                                        <Textarea 
+                                          placeholder="Any specific concerns, areas of focus, or special requirements..."
+                                          className="resize-none"
+                                          rows={3}
+                                          {...field}
+                                          data-testid="textarea-edit-notes"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
 
                               <div className="flex justify-end space-x-2">
                                 <Button type="button" variant="outline" onClick={() => setEditingRequest(null)}>
