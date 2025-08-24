@@ -168,6 +168,11 @@ export function useLocalStore() {
       ...prev,
       allInspectorProfiles: [...prev.allInspectorProfiles.filter(p => p.id !== profile.id), profile]
     }));
+    
+    // Trigger a storage event to notify other components
+    setTimeout(() => {
+      window.dispatchEvent(new Event('storage'));
+    }, 100);
   };
 
   const getAllInspectorProfiles = () => {

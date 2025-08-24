@@ -13,39 +13,60 @@ export default function Inspectors() {
   const [inspectors, setInspectors] = useState<InspectorProfile[]>([]);
   const { getAllInspectorProfiles } = useLocalStore();
 
-  useEffect(() => {
+  const loadInspectors = () => {
     // Load real inspector profiles from signup + some demo data
     const realProfiles = getAllInspectorProfiles();
-    const allProfiles = [...realProfiles];
     
-    // Add mock data if no real inspectors exist yet for demo purposes
-    if (realProfiles.length === 0) {
-      const mockProfiles = mockInspectors.inspectors.map(mock => ({
-        id: mock.id,
-        displayName: mock.name,
-        serviceAreas: mock.serviceAreas,
-        specialties: mock.specialties,
-        basePrice: mock.basePrice,
-        email: mock.contact.email,
-        phone: mock.contact.phone,
-        location: mock.location,
-        bio: mock.bio,
-        yearsExperience: mock.yearsExperience,
-        certifications: mock.certifications,
-        rating: mock.rating,
-        reviewCount: mock.reviewCount,
-        completedInspections: mock.completedInspections,
-        image: mock.image,
-        verified: mock.verified,
-        availability: mock.availability,
-        contact: mock.contact,
-        insurance: mock.insurance
-      }));
-      allProfiles.push(...mockProfiles);
-    }
+    // Always include mock data for demo purposes, then add real profiles
+    const mockProfiles = mockInspectors.inspectors.map(mock => ({
+      id: mock.id,
+      displayName: mock.name,
+      serviceAreas: mock.serviceAreas,
+      specialties: mock.specialties,
+      basePrice: mock.basePrice,
+      email: mock.contact.email,
+      phone: mock.contact.phone,
+      location: mock.location,
+      bio: mock.bio,
+      yearsExperience: mock.yearsExperience,
+      certifications: mock.certifications,
+      rating: mock.rating,
+      reviewCount: mock.reviewCount,
+      completedInspections: mock.completedInspections,
+      image: mock.image,
+      verified: mock.verified,
+      availability: mock.availability,
+      contact: mock.contact,
+      insurance: mock.insurance
+    }));
+    
+    // Combine mock profiles with real profiles, ensuring no duplicates
+    const allProfiles = [...mockProfiles, ...realProfiles];
     
     setInspectors(allProfiles);
-  }, [getAllInspectorProfiles]);
+  };
+
+  useEffect(() => {
+    loadInspectors();
+  }, []);
+
+  // Refresh inspectors when storage changes (to catch new signups)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      loadInspectors();
+    };
+    
+    // Listen for storage events (triggered when new inspectors are added)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also refresh when window regains focus
+    window.addEventListener('focus', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleStorageChange);
+    };
+  }, []);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
