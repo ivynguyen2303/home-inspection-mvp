@@ -141,10 +141,10 @@ export default function InspectorDashboard() {
           <TabsContent value="requests" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-semibold text-secondary">Recent Open Requests</h2>
-              <Link href="/requests">
+              <Link href="/my-requests">
                 <Button data-testid="button-view-all-open-requests">
                   <Plus className="mr-2 h-4 w-4" />
-                  View All Requests
+                  View All My Request
                 </Button>
               </Link>
             </div>
