@@ -13,6 +13,7 @@ import PostRequest from "@/pages/PostRequest";
 import RequestsList from "@/pages/RequestsList";
 import RequestDetail from "@/pages/RequestDetail";
 import InspectorDashboard from "@/pages/InspectorDashboard";
+import MyRequests from "@/pages/MyRequests";
 import Thanks from "@/pages/Thanks";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
@@ -35,6 +36,9 @@ function Router() {
       </Route>
       <Route path="/post">
         <RoleRoute role="client"><PostRequest /></RoleRoute>
+      </Route>
+      <Route path="/my-requests">
+        <RoleRoute role="client"><MyRequests /></RoleRoute>
       </Route>
       <Route path="/requests">
         <RoleRoute role="inspector"><RequestsList /></RoleRoute>

@@ -1,0 +1,383 @@
+import { useState } from 'react';
+import { Header } from '@/components/header';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { useLocalStore } from '@/store/localStore';
+import { useAuth } from '@/auth/AuthProvider';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Calendar, Home, DollarSign, Clock, Edit2, Trash2, FileText, Heart } from 'lucide-react';
+
+const updateRequestSchema = z.object({
+  preferredDate: z.string().min(1, 'Preferred date is required'),
+  altDate: z.string().optional(),
+  budget: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type UpdateRequestData = z.infer<typeof updateRequestSchema>;
+
+export default function MyRequests() {
+  const { user } = useAuth();
+  const { getClientRequests, updateRequest, deleteRequest } = useLocalStore();
+  const { toast } = useToast();
+  const [editingRequest, setEditingRequest] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+          <p className="text-lg text-muted">Please log in to view your requests.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const myRequests = getClientRequests(user.email);
+
+  const form = useForm<UpdateRequestData>({
+    resolver: zodResolver(updateRequestSchema),
+    defaultValues: {
+      preferredDate: '',
+      altDate: '',
+      budget: '',
+      notes: '',
+    },
+  });
+
+  const handleEdit = (requestId: string) => {
+    const request = myRequests.find(r => r.id === requestId);
+    if (request) {
+      form.reset({
+        preferredDate: request.schedule.preferredDate,
+        altDate: request.schedule.altDate || '',
+        budget: request.budget?.toString() || '',
+        notes: request.notes || '',
+      });
+      setEditingRequest(requestId);
+    }
+  };
+
+  const onSubmitUpdate = async (data: UpdateRequestData) => {
+    if (!editingRequest) return;
+
+    try {
+      updateRequest(editingRequest, user.email, {
+        schedule: {
+          preferredDate: data.preferredDate,
+          altDate: data.altDate || undefined,
+        },
+        budget: data.budget ? parseInt(data.budget) : undefined,
+        notes: data.notes || '',
+      });
+
+      toast({
+        title: "Request Updated",
+        description: "Your inspection request has been updated successfully.",
+      });
+
+      setEditingRequest(null);
+      form.reset();
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update request",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = async (requestId: string) => {
+    try {
+      deleteRequest(requestId, user.email);
+      
+      toast({
+        title: "Request Deleted",
+        description: "Your inspection request has been deleted successfully.",
+      });
+
+      setDeleteDialogOpen(null);
+    } catch (error) {
+      toast({
+        title: "Delete Failed", 
+        description: error instanceof Error ? error.message : "Failed to delete request",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-secondary mb-2 flex items-center" data-testid="text-my-requests-title">
+            <FileText className="mr-3 h-8 w-8" />
+            My Requests
+          </h1>
+          <p className="text-muted" data-testid="text-my-requests-subtitle">
+            View, edit, and manage your inspection requests
+          </p>
+        </div>
+
+        {/* Requests List */}
+        {myRequests.length === 0 ? (
+          <Card className="bg-white rounded-xl shadow-lg">
+            <CardContent className="p-12 text-center">
+              <FileText className="mx-auto h-16 w-16 text-muted mb-4" />
+              <h3 className="text-xl font-semibold text-secondary mb-2">No Requests Yet</h3>
+              <p className="text-muted mb-6">You haven't posted any inspection requests yet.</p>
+              <Button onClick={() => window.location.href = '/inspectors'} data-testid="button-find-inspectors">
+                Find Inspectors
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {myRequests.map((request) => (
+              <Card key={request.id} className="bg-white rounded-xl shadow-lg" data-testid={`card-my-request-${request.id}`}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <CardTitle className="text-xl">{request.property.cityZip}</CardTitle>
+                        <Badge 
+                          className={`text-xs ${
+                            request.type === 'client_request' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-purple-100 text-purple-800'
+                          }`}
+                        >
+                          {request.type === 'client_request' ? 'Client Request' : 'Open Request'}
+                        </Badge>
+                        <Badge 
+                          className={`text-xs ${
+                            request.status === 'open' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
+                          {request.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted">
+                        Created {new Date(request.createdAt).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Dialog open={editingRequest === request.id} onOpenChange={(open) => !open && setEditingRequest(null)}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEdit(request.id)}
+                            data-testid={`button-edit-${request.id}`}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit Request</DialogTitle>
+                          </DialogHeader>
+                          <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmitUpdate)} className="space-y-4">
+                              <FormField
+                                control={form.control}
+                                name="preferredDate"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Preferred Date</FormLabel>
+                                    <FormControl>
+                                      <Input type="datetime-local" {...field} data-testid="input-edit-preferred-date" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="altDate"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Alternative Date (Optional)</FormLabel>
+                                    <FormControl>
+                                      <Input type="datetime-local" {...field} data-testid="input-edit-alt-date" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="budget"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Budget (Optional)</FormLabel>
+                                    <FormControl>
+                                      <Input type="number" placeholder="500" {...field} data-testid="input-edit-budget" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="notes"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Notes (Optional)</FormLabel>
+                                    <FormControl>
+                                      <Textarea 
+                                        placeholder="Any additional details..."
+                                        className="resize-none"
+                                        rows={3}
+                                        {...field}
+                                        data-testid="textarea-edit-notes"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="flex justify-end space-x-2">
+                                <Button type="button" variant="outline" onClick={() => setEditingRequest(null)}>
+                                  Cancel
+                                </Button>
+                                <Button type="submit" data-testid="button-save-changes">
+                                  Save Changes
+                                </Button>
+                              </div>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
+
+                      <AlertDialog open={deleteDialogOpen === request.id} onOpenChange={(open) => !open && setDeleteDialogOpen(null)}>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                            onClick={() => setDeleteDialogOpen(request.id)}
+                            data-testid={`button-delete-${request.id}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Request</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this inspection request? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(request.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                              data-testid="button-confirm-delete"
+                            >
+                              Delete Request
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm text-muted">
+                        <Home className="w-4 h-4 mr-2" />
+                        <span>{request.property.type} • {request.property.beds}bd/{request.property.baths}ba</span>
+                        {request.property.sqft && <span> • {request.property.sqft} sqft</span>}
+                      </div>
+                      
+                      <div className="flex items-center text-sm text-muted">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        <span>
+                          Preferred: {new Date(request.schedule.preferredDate).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+
+                      {request.schedule.altDate && (
+                        <div className="flex items-center text-sm text-muted">
+                          <Clock className="w-4 h-4 mr-2" />
+                          <span>
+                            Alt: {new Date(request.schedule.altDate).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      {request.budget && (
+                        <div className="flex items-center text-sm text-muted">
+                          <DollarSign className="w-4 h-4 mr-2" />
+                          <span>Budget: ${request.budget}</span>
+                        </div>
+                      )}
+
+                      {request.interestCount > 0 && (
+                        <div className="flex items-center text-sm text-muted">
+                          <Heart className="w-4 h-4 mr-2 fill-red-500 text-red-500" />
+                          <span>{request.interestCount} inspector{request.interestCount !== 1 ? 's' : ''} interested</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {request.notes && (
+                    <div className="border-t pt-3">
+                      <p className="text-sm">
+                        <span className="font-medium">Notes: </span>
+                        {request.notes}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

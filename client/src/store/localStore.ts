@@ -338,6 +338,63 @@ export function useLocalStore() {
     return newRequest.id;
   };
 
+  // Get requests created by a specific client (by email)
+  const getClientRequests = (clientEmail: string) => {
+    return store.requests.filter(req => req.client.email === clientEmail);
+  };
+
+  // Update a request (only if it belongs to the client)
+  const updateRequest = (requestId: string, clientEmail: string, updates: Partial<Omit<Request, 'id' | 'createdAt' | 'client'>>) => {
+    const request = store.requests.find(r => r.id === requestId);
+    if (!request || request.client.email !== clientEmail) {
+      throw new Error('Request not found or unauthorized');
+    }
+
+    setStore(prev => ({
+      ...prev,
+      requests: prev.requests.map(req =>
+        req.id === requestId ? { ...req, ...updates } : req
+      )
+    }));
+  };
+
+  // Delete a request (only if it belongs to the client)
+  const deleteRequest = (requestId: string, clientEmail: string) => {
+    const request = store.requests.find(r => r.id === requestId);
+    if (!request || request.client.email !== clientEmail) {
+      throw new Error('Request not found or unauthorized');
+    }
+
+    setStore(prev => ({
+      ...prev,
+      requests: prev.requests.filter(req => req.id !== requestId)
+    }));
+
+    // If it was a client_request, mark the time slot as available again
+    if (request.type === 'client_request' && request.targetInspectorId) {
+      setStore(prev => ({
+        ...prev,
+        allInspectorProfiles: prev.allInspectorProfiles.map(profile => {
+          if (profile.id === request.targetInspectorId && profile.availability?.timeSlots) {
+            return {
+              ...profile,
+              availability: {
+                ...profile.availability,
+                timeSlots: profile.availability.timeSlots.map(slot => {
+                  // Check if this slot matches the request's preferred date/time
+                  const preferredDateTime = request.schedule.preferredDate;
+                  const slotDateTime = `${slot.date} ${slot.startTime}-${slot.endTime}`;
+                  return slotDateTime === preferredDateTime ? { ...slot, available: true } : slot;
+                })
+              }
+            };
+          }
+          return profile;
+        })
+      }));
+    }
+  };
+
   return {
     requests: store.requests,
     inspectorProfile: store.inspectorProfile,
@@ -352,6 +409,9 @@ export function useLocalStore() {
     getMyInterests,
     clearAllData,
     createBookingFromTimeSlot,
-    createOpenRequest
+    createOpenRequest,
+    getClientRequests,
+    updateRequest,
+    deleteRequest
   };
 }

@@ -42,13 +42,22 @@ export function Header() {
                 {/* Role-specific navigation */}
                 <div className="flex space-x-3">
                   {user.role === "client" ? (
-                    <Link 
-                      href="/inspectors" 
-                      className="text-secondary hover:text-primary font-medium transition-colors"
-                      data-testid="link-find-inspectors"
-                    >
-                      Find Inspectors
-                    </Link>
+                    <>
+                      <Link 
+                        href="/inspectors" 
+                        className="text-secondary hover:text-primary font-medium transition-colors"
+                        data-testid="link-find-inspectors"
+                      >
+                        Find Inspectors
+                      </Link>
+                      <Link 
+                        href="/my-requests" 
+                        className="bg-primary hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium transition-colors text-sm"
+                        data-testid="link-my-requests"
+                      >
+                        My Requests
+                      </Link>
+                    </>
                   ) : (
                     <>
                       <Link 
