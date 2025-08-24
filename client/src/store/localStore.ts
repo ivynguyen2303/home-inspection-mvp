@@ -122,10 +122,15 @@ export function useLocalStore() {
         const parsed = JSON.parse(savedRequests);
         console.log('🏪 [STORE INIT] Parsed shared requests:', parsed);
         
-        // Clear old incompatible data format
-        if (parsed.some && parsed.some((r: any) => r.interestedInspectorIds || r.targetInspectorId)) {
+        // Only clear if we actually find the old problematic fields
+        const hasOldFormat = Array.isArray(parsed) && parsed.some((r: any) => 
+          r.hasOwnProperty('interestedInspectorIds') || r.hasOwnProperty('targetInspectorId')
+        );
+        
+        if (hasOldFormat) {
           console.log('🏪 [STORE INIT] Old request format detected, clearing');
           localStorage.removeItem(SHARED_REQUESTS_KEY);
+          sharedRequests = [];
         } else {
           sharedRequests = Array.isArray(parsed) ? parsed : [];
           console.log('🏪 [STORE INIT] Final shared requests loaded:', sharedRequests.length, 'requests');
