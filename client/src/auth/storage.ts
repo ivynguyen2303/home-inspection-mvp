@@ -106,6 +106,46 @@ export function initializeDemoAccounts(): void {
         name: 'Demo Inspector',
         phone: '(555) 987-6543',
         createdAt: new Date().toISOString()
+      },
+      {
+        id: 'usr_client_002',
+        email: 'michael.chen@email.com',
+        role: 'client',
+        name: 'Michael Chen',
+        phone: '(415) 555-0147',
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'usr_client_003',
+        email: 'emily.rodriguez@email.com',
+        role: 'client',
+        name: 'Emily Rodriguez',
+        phone: '(415) 555-0198',
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'usr_client_004',
+        email: 'david.kim@email.com',
+        role: 'client',
+        name: 'David Kim',
+        phone: '(415) 555-0276',
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'usr_client_005',
+        email: 'jennifer.taylor@email.com',
+        role: 'client',
+        name: 'Jennifer Taylor',
+        phone: '(415) 555-0334',
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'usr_client_006',
+        email: 'alex.martinez@email.com',
+        role: 'client',
+        name: 'Alex Martinez',
+        phone: '(415) 555-0412',
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
       }
     ];
 
