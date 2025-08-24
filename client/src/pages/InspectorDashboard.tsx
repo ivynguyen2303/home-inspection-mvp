@@ -14,12 +14,22 @@ export default function InspectorDashboard() {
   const { requests, getMyInterests, inspectorProfile } = useLocalStore();
   const [activeTab, setActiveTab] = useState('requests');
   
-  const openRequests = requests.filter(req => 
-    req.status === 'open' && req.type === 'open_request'
-  );
+  // Debug: Check all requests and filtering
+  console.log('Inspector Dashboard - All requests:', requests);
+  console.log('Inspector Dashboard - Total requests:', requests.length);
+  
+  const openRequests = requests.filter(req => {
+    const isOpen = req.status === 'open' && req.type === 'open_request';
+    console.log(`Request ${req.id}: status=${req.status}, type=${req.type}, isOpenRequest=${isOpen}`);
+    return isOpen;
+  });
+  
   const clientRequests = requests.filter(req => 
     req.status === 'open' && req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id
   );
+  
+  console.log('Inspector Dashboard - Open requests found:', openRequests.length);
+  console.log('Inspector Dashboard - Client requests found:', clientRequests.length);
   const myInterests = getMyInterests();
 
   return (
