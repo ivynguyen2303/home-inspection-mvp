@@ -17,8 +17,6 @@ export default function InspectorDashboard() {
   const openRequests = requests.filter(req => 
     req.status === 'open' && req.type === 'open_request'
   );
-  console.log('All requests:', requests);
-  console.log('Open requests filtered:', openRequests);
   const clientRequests = requests.filter(req => 
     req.status === 'open' && req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id
   );
