@@ -96,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (user.role === 'client') {
         setLocation('/inspectors');
       } else {
-        setLocation('/inspector');
+        setLocation('/requests');
       }
     } catch (error) {
       toast({
@@ -159,7 +159,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (user.role === 'client') {
         setLocation('/inspectors');
       } else {
-        setLocation('/inspector');
+        setLocation('/requests');
       }
     } catch (error) {
       toast({
