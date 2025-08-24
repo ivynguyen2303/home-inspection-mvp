@@ -70,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (authState.user && authState.user.role === 'inspector') {
       setCurrentInspectorProfile(authState.user.email);
     }
-  }, [authState.user, setCurrentInspectorProfile]);
+  }, [authState.user?.email, authState.user?.role]);
 
   const login = async (credentials: LoginCredentials): Promise<User> => {
     try {

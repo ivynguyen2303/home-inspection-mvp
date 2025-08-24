@@ -85,7 +85,19 @@ export function useLocalStore() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        
+        // Clear old incompatible data format
+        if (parsed.inspectorProfile?.id || 
+            parsed.requests?.some((r: any) => r.interestedInspectorIds) ||
+            parsed.requests?.some((r: any) => r.targetInspectorId)) {
+          console.log('Old data format detected, clearing for fresh start');
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem('inspect_now_users');
+          localStorage.removeItem('inspect_now_session');
+        } else {
+          return parsed;
+        }
       }
     } catch (error) {
       console.error('Error loading from localStorage:', error);
@@ -304,7 +316,7 @@ export function useLocalStore() {
 
   const getMyInterests = () => {
     return store.requests.filter(req => 
-      req.interestedInspectorEmails.includes(store.inspectorProfile.email)
+      req.interestedInspectorEmails?.includes(store.inspectorProfile.email)
     );
   };
 
