@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +21,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function Login() {
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -33,10 +34,19 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     try {
-      await login(data as LoginCredentials);
+      const user = await login(data as LoginCredentials);
+      
+      // Handle redirect after successful login with a small delay 
+      // to ensure auth state is updated
+      setTimeout(() => {
+        if (user?.role === 'client') {
+          setLocation('/inspectors');
+        } else {
+          setLocation('/requests');
+        }
+      }, 100);
     } catch (error) {
       // Error is handled in AuthProvider with toast
-    } finally {
       setIsSubmitting(false);
     }
   };

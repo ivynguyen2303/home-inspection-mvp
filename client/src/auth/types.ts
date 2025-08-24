@@ -34,7 +34,7 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<User>;
   signup: (data: SignupData) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<Pick<User, 'name' | 'phone'>>) => Promise<void>;

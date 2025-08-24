@@ -92,12 +92,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         description: `Logged in as ${user.name || user.email}`,
       });
 
-      // Redirect based on role
-      if (user.role === 'client') {
-        setLocation('/inspectors');
-      } else {
-        setLocation('/requests');
-      }
+      // Return user info so the component can handle redirect
+      return user;
     } catch (error) {
       toast({
         title: "Login Failed",
