@@ -120,7 +120,6 @@ export function useLocalStore() {
   }, [store]);
 
   const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorIds'>) => {
-    console.log('addRequest called with:', requestData);
     const newRequest: Request = {
       ...requestData,
       id: `req_${Date.now()}`,
@@ -128,7 +127,6 @@ export function useLocalStore() {
       interestCount: 0,
       interestedInspectorIds: []
     };
-    console.log('addRequest created request:', newRequest);
     
     // Try direct localStorage manipulation as backup
     try {
@@ -139,13 +137,15 @@ export function useLocalStore() {
         requests: [newRequest, ...parsed.requests]
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
-      console.log('addRequest - Direct localStorage save successful');
       
       // Force React to re-read from localStorage
       setStore(updatedData);
-      console.log('addRequest - Forced store update');
     } catch (error) {
-      console.error('addRequest - localStorage backup failed:', error);
+      // Fallback to regular state update if localStorage fails
+      setStore(prev => ({
+        ...prev,
+        requests: [newRequest, ...prev.requests]
+      }));
     }
     
     return newRequest.id;
@@ -237,6 +237,37 @@ export function useLocalStore() {
 
   const getInspectorProfileById = (id: string) => {
     return store.allInspectorProfiles.find(profile => profile.id === id);
+  };
+
+  // Remove inspector profile when account is deleted
+  const removeInspectorProfile = (userId: string) => {
+    console.log('removeInspectorProfile called for userId:', userId);
+    
+    // Direct localStorage manipulation to ensure persistence
+    try {
+      const currentData = localStorage.getItem(STORAGE_KEY);
+      const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
+      
+      // Remove the inspector profile
+      const updatedProfiles = parsed.allInspectorProfiles.filter((profile: InspectorProfile) => profile.id !== userId);
+      console.log('removeInspectorProfile - Profiles before:', parsed.allInspectorProfiles.length);
+      console.log('removeInspectorProfile - Profiles after:', updatedProfiles.length);
+      
+      const updatedData = {
+        ...parsed,
+        allInspectorProfiles: updatedProfiles
+      };
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+      console.log('removeInspectorProfile - Direct localStorage save successful');
+      
+      // Force React to re-read from localStorage
+      setStore(updatedData);
+      console.log('removeInspectorProfile - Forced store update');
+      
+    } catch (error) {
+      console.error('removeInspectorProfile - localStorage backup failed:', error);
+    }
   };
 
   const getRequestById = (id: string) => {
@@ -450,6 +481,7 @@ export function useLocalStore() {
     addInspectorProfile,
     getAllInspectorProfiles,
     getInspectorProfileById,
+    removeInspectorProfile,
     getRequestById,
     getMyInterests,
     clearAllData,

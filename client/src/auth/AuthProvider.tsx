@@ -37,7 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { updateInspectorProfile, addInspectorProfile } = useLocalStore();
+  const { updateInspectorProfile, addInspectorProfile, removeInspectorProfile } = useLocalStore();
 
   // Initialize session on mount
   useEffect(() => {
@@ -242,6 +242,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Remove user from auth storage
       deleteUser(userId);
+      
+      // ALSO remove inspector profile if they have one
+      removeInspectorProfile(userId);
       
       // Clear session
       setSession(null);

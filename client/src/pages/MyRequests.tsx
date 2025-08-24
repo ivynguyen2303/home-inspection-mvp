@@ -56,9 +56,6 @@ export default function MyRequests() {
   }
 
   const myRequests = getClientRequests(user.email);
-  console.log('MyRequests - User email:', user.email);
-  console.log('MyRequests - Found requests:', myRequests.length);
-  console.log('MyRequests - Requests:', myRequests);
 
   const form = useForm<UpdateRequestData>({
     resolver: zodResolver(updateRequestSchema),
