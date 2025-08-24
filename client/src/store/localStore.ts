@@ -323,6 +323,14 @@ export function useLocalStore() {
       throw new Error('Inspector or time slot not found');
     }
 
+    // Debug: Log which inspector we're targeting
+    console.log('Creating client request for inspector:', {
+      inspectorId,
+      inspectorName: inspector.displayName,
+      inspectorEmail: inspector.email,
+      timeSlot: `${timeSlot.date} ${timeSlot.startTime}-${timeSlot.endTime}`
+    });
+
     // Create the request
     const newRequest: Request = {
       id: `req_${Date.now()}`,
