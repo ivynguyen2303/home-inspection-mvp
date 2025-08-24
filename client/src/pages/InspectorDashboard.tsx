@@ -14,6 +14,13 @@ export default function InspectorDashboard() {
   const { requests, getMyInterests, inspectorProfile } = useLocalStore();
   const [activeTab, setActiveTab] = useState('requests');
   
+  // Debug inspector profile loading
+  console.log('InspectorDashboard - Inspector profile debug:', {
+    profileId: inspectorProfile.id,
+    profileName: inspectorProfile.displayName,
+    profileExists: !!inspectorProfile.id
+  });
+  
   // Filter requests for this inspector only
   const openRequests = requests.filter(req => 
     req.status === 'open' && req.type === 'open_request'
