@@ -24,7 +24,9 @@ const timeSlotSchema = z.object({
   startHour: z.string().min(1, 'Start hour is required'),
   startPeriod: z.enum(['AM', 'PM']),
   endHour: z.string().min(1, 'End hour is required'),
-  endPeriod: z.enum(['AM', 'PM'])
+  endPeriod: z.enum(['AM', 'PM']),
+  repeat: z.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly']),
+  endDate: z.date().optional()
 });
 
 type TimeSlotFormData = z.infer<typeof timeSlotSchema>;
@@ -42,7 +44,9 @@ export function AvailabilityManager() {
       startHour: '',
       startPeriod: 'AM',
       endHour: '',
-      endPeriod: 'AM'
+      endPeriod: 'AM',
+      repeat: 'none',
+      endDate: undefined
     }
   });
 
@@ -66,19 +70,52 @@ export function AvailabilityManager() {
     return { hour: (hourNum - 12).toString(), period: 'PM' };
   };
 
-  const addTimeSlot = (data: TimeSlotFormData) => {
+  const generateRecurringSlots = (data: TimeSlotFormData) => {
     const startTime = convertTo24Hour(data.startHour, data.startPeriod);
     const endTime = convertTo24Hour(data.endHour, data.endPeriod);
+    const slots = [];
     
-    const newSlot = {
-      id: `slot_${Date.now()}`,
-      date: format(data.date, 'yyyy-MM-dd'),
-      startTime,
-      endTime,
-      available: true
-    };
+    let currentDate = new Date(data.date);
+    const endDate = data.endDate || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000); // Default 3 months
+    
+    while (currentDate <= endDate) {
+      slots.push({
+        id: `slot_${Date.now()}_${currentDate.getTime()}`,
+        date: format(currentDate, 'yyyy-MM-dd'),
+        startTime,
+        endTime,
+        available: true
+      });
+      
+      // Calculate next occurrence based on repeat type
+      switch (data.repeat) {
+        case 'daily':
+          currentDate.setDate(currentDate.getDate() + 1);
+          break;
+        case 'weekly':
+          currentDate.setDate(currentDate.getDate() + 7);
+          break;
+        case 'biweekly':
+          currentDate.setDate(currentDate.getDate() + 14);
+          break;
+        case 'monthly':
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          break;
+        default:
+          // 'none' - only create one slot
+          break;
+      }
+      
+      // Prevent infinite loop for 'none' repeat
+      if (data.repeat === 'none') break;
+    }
+    
+    return slots;
+  };
 
-    const updatedTimeSlots = [...timeSlots, newSlot];
+  const addTimeSlot = (data: TimeSlotFormData) => {
+    const newSlots = generateRecurringSlots(data);
+    const updatedTimeSlots = [...timeSlots, ...newSlots];
     
     updateInspectorProfile({
       availability: {
@@ -89,9 +126,12 @@ export function AvailabilityManager() {
       }
     });
 
+    const slotCount = newSlots.length;
     toast({
-      title: "Time Slot Added",
-      description: `Added ${format(data.date, 'MMM dd, yyyy')} ${data.startHour}:00 ${data.startPeriod}-${data.endHour}:00 ${data.endPeriod}`,
+      title: slotCount > 1 ? "Recurring Time Slots Added" : "Time Slot Added",
+      description: slotCount > 1 
+        ? `Added ${slotCount} ${data.repeat} slots starting ${format(data.date, 'MMM dd, yyyy')}`
+        : `Added ${format(data.date, 'MMM dd, yyyy')} ${data.startHour}:00 ${data.startPeriod}-${data.endHour}:00 ${data.endPeriod}`,
     });
 
     form.reset({
@@ -99,7 +139,9 @@ export function AvailabilityManager() {
       startHour: '',
       startPeriod: 'AM',
       endHour: '',
-      endPeriod: 'AM'
+      endPeriod: 'AM',
+      repeat: 'none',
+      endDate: undefined
     });
     setDialogOpen(false);
   };
@@ -353,6 +395,76 @@ export function AvailabilityManager() {
                         />
                       </div>
                     </div>
+
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="repeat"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Repeat</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-repeat">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">One time only</SelectItem>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {form.watch('repeat') !== 'none' && (
+                        <FormField
+                          control={form.control}
+                          name="endDate"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel>Repeat Until (Optional)</FormLabel>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
+                                      data-testid="button-end-date"
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "PPP")
+                                      ) : (
+                                        <span>Select end date (default: 3 months)</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    disabled={(date) =>
+                                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                                    }
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+                    
                     <div className="flex justify-end space-x-2">
                       <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} data-testid="button-cancel-slot">
                         Cancel
