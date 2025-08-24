@@ -35,7 +35,7 @@ export default function InspectorProfile() {
     let foundInspector = getInspectorProfileById(params.id);
     
     // Check if current user is a demo account - only show mock data for demo accounts
-    const isDemoAccount = user?.email === 'client_demo@example.com';
+    const isDemoAccount = user?.email === 'client_demo@example.com' || user?.email === 'inspector_demo@example.com';
     
     // Fall back to mock data only if no real profile exists AND user is demo account
     if (!foundInspector && isDemoAccount) {

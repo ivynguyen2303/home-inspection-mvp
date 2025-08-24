@@ -12,15 +12,15 @@ import { mockInspectors } from "@/data/mockInspectors";
 
 export default function Inspectors() {
   const [inspectors, setInspectors] = useState<InspectorProfile[]>([]);
-  const { getAllInspectorProfiles } = useLocalStore();
+  const { getAllInspectorProfiles, clearMockDataForRealAccounts } = useLocalStore();
   const { user } = useAuth();
 
   const loadInspectors = () => {
     // Load real inspector profiles from signup
     const realProfiles = getAllInspectorProfiles();
     
-    // Check if current user is a demo account
-    const isDemoAccount = user?.email === 'client_demo@example.com';
+    // Check if current user is a demo account - check both client and inspector demo accounts
+    const isDemoAccount = user?.email === 'client_demo@example.com' || user?.email === 'inspector_demo@example.com';
     
     if (isDemoAccount) {
       // For demo accounts, show mock data + any real profiles
@@ -50,7 +50,10 @@ export default function Inspectors() {
       const allProfiles = [...mockProfiles, ...realProfiles];
       setInspectors(allProfiles);
     } else {
-      // For real accounts, only show real inspector profiles
+      // For real accounts, ONLY show real inspector profiles (no mock data)
+      console.log('Real account - showing only real profiles:', realProfiles.length);
+      // Clear any mock data that might have persisted from localStorage
+      clearMockDataForRealAccounts();
       setInspectors(realProfiles);
     }
   };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { mockRequests } from '@/data/mockRequests';
+import { mockInspectors } from '@/data/mockInspectors';
 
 export interface Request {
   id: string;
@@ -92,7 +93,30 @@ export function useLocalStore() {
     };
   });
 
-  // Load example requests on first run - only for demo accounts or if no real requests exist
+  // Clear localStorage and reset data for new sessions - this ensures no mock data persists for real accounts
+  const clearMockDataForRealAccounts = () => {
+    // This will be called by components that have access to user info to clean up mock data
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    
+    // If we have stored data but it contains mock inspector IDs, clean it up
+    if (stored.allInspectorProfiles) {
+      const mockInspectorIds = mockInspectors.inspectors.map((i: any) => i.id);
+      const cleanProfiles = stored.allInspectorProfiles.filter(
+        (profile: InspectorProfile) => !mockInspectorIds.includes(profile.id)
+      );
+      
+      const cleanedStore = {
+        ...stored,
+        allInspectorProfiles: cleanProfiles,
+        requests: stored.requests || []
+      };
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedStore));
+      setStore(cleanedStore);
+    }
+  };
+
+  // Load example requests only for demo accounts or if no real requests exist
   useEffect(() => {
     if (store.requests.length === 0 && mockRequests.length > 0) {
       setStore(prev => ({ ...prev, requests: mockRequests }));
@@ -204,6 +228,7 @@ export function useLocalStore() {
     getAllInspectorProfiles,
     getInspectorProfileById,
     getRequestById,
-    getMyInterests
+    getMyInterests,
+    clearMockDataForRealAccounts
   };
 }
