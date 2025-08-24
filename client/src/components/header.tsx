@@ -1,8 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { MapPin } from "lucide-react";
+import { RoleSwitch } from "@/components/RoleSwitch";
+import { useLocalStore } from "@/store/localStore";
 
 export function Header() {
   const [location] = useLocation();
+  const { role } = useLocalStore();
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -18,41 +21,73 @@ export function Header() {
               </Link>
             </div>
           </div>
-          <nav className="flex space-x-8">
-            {location === "/" ? (
-              <Link 
-                href="/inspectors" 
-                className="text-secondary hover:text-primary font-medium transition-colors"
-                data-testid="link-find-inspectors"
-              >
-                Find Inspectors
-              </Link>
-            ) : location.startsWith("/inspectors") ? (
-              <>
-                <Link 
-                  href="/inspectors" 
-                  className="text-secondary hover:text-primary font-medium transition-colors"
-                  data-testid="link-back-to-inspectors"
-                >
-                  Back to Inspectors
-                </Link>
-                <Link 
-                  href="/" 
-                  className="text-secondary hover:text-primary font-medium transition-colors"
-                  data-testid="link-home-nav"
-                >
-                  Home
-                </Link>
-              </>
-            ) : (
-              <Link 
-                href="/" 
-                className="text-secondary hover:text-primary font-medium transition-colors"
-                data-testid="link-home-nav"
-              >
-                Home
-              </Link>
-            )}
+          <nav className="flex items-center space-x-6">
+            <RoleSwitch />
+            <div className="flex space-x-4">
+              {role === "client" ? (
+                <>
+                  {location === "/" ? (
+                    <>
+                      <Link 
+                        href="/inspectors" 
+                        className="text-secondary hover:text-primary font-medium transition-colors"
+                        data-testid="link-find-inspectors"
+                      >
+                        Find Inspectors
+                      </Link>
+                      <Link 
+                        href="/post" 
+                        className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        data-testid="link-post-request"
+                      >
+                        Post Request
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link 
+                        href="/" 
+                        className="text-secondary hover:text-primary font-medium transition-colors"
+                        data-testid="link-home-nav"
+                      >
+                        Home
+                      </Link>
+                      <Link 
+                        href="/inspectors" 
+                        className="text-secondary hover:text-primary font-medium transition-colors"
+                        data-testid="link-find-inspectors"
+                      >
+                        Find Inspectors
+                      </Link>
+                      <Link 
+                        href="/post" 
+                        className="text-secondary hover:text-primary font-medium transition-colors"
+                        data-testid="link-post-request"
+                      >
+                        Post Request
+                      </Link>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link 
+                    href="/requests" 
+                    className="text-secondary hover:text-primary font-medium transition-colors"
+                    data-testid="link-view-requests"
+                  >
+                    View Requests
+                  </Link>
+                  <Link 
+                    href="/inspector" 
+                    className="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    data-testid="link-inspector-dashboard"
+                  >
+                    Dashboard
+                  </Link>
+                </>
+              )}
+            </div>
           </nav>
         </div>
       </div>

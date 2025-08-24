@@ -1,0 +1,123 @@
+Enhance the existing React + Vite "Home Inspector Finder" app to support a basic, inspector-facing MVP while keeping the current buyer flow intact. Keep it lightweight and demo-ready (no real auth).
+
+## High-level goals
+- Let **clients** post an inspection request (job posting).
+- Let **inspectors** view a feed of open requests, filter them, and mark "Interested".
+- Provide a simple, no-auth "role switch" so we can demo buyer vs inspector views.
+
+## New routes / pages
+1) "/post" — Client Request Form
+   - Fields: name, email, phone (optional), propertyAddress, cityZip, preferredDate, altDate (optional), propertyType (House/Townhome/Condo), beds, baths, sqft (optional), notes, budget (optional)
+   - Submit creates a request in a local JSON/Store (no backend; persist to localStorage for demo).
+   - On success: redirect to "/thanks" with a short confirmation + link to "/requests" for inspectors.
+
+2) "/requests" — Inspector Request Feed
+   - Shows a list of **open** requests (sorted by soonest preferredDate).
+   - Each card shows: cityZip, preferredDate, propertyType, beds/baths, brief notes (truncate), contact "masked" (e.g., first name + email obfuscated).
+   - Filters: city/ZIP (text), date (>= today), property type (select).
+   - Card actions:
+     - "View Details" → "/requests/:id"
+     - "I'm Interested" (toggles interestedIDs array and increments interestCount)
+   - Persist interest state in localStorage; visually indicate when already interested.
+
+3) "/requests/:id" — Request Detail (Inspector view)
+   - Full request details.
+   - Show interest count and a button "I'm Interested" (same toggle).
+   - Show a "Contact Client" placeholder action (disabled for now) + note: “Contact details are shared after client accepts an inspector” (demo text only).
+
+4) "/inspector" — Inspector Dashboard
+   - Tabs: "Open Requests", "My Interests"
+   - "My Interests" lists the requests the inspector marked interested in.
+   - Add a light "Profile” box to edit displayName, serviceAreas (comma-separated), specialties (tags), basePrice (number). Persist to localStorage.
+
+5) "/thanks" — simple confirmation page after posting.
+
+## Navigation / Role Switch
+- Update the header to include a simple **Role Switch** control (dropdown or toggle) with "Client" and "Inspector".
+- When "Client" is selected: show primary CTA "Find Inspectors" + link to "/post".
+- When "Inspector" is selected: show primary CTA "View Requests" linking to "/requests" + link to "/inspector".
+- Store role in localStorage and use it to adjust nav labels/CTAs.
+
+## Data models
+Create `src/data/requests.example.json` as seed data and mirror into localStorage on first load.
+
+Request schema:
+{
+  "id": "req_0001",
+  "createdAt": "2025-08-23T10:00:00Z",
+  "status": "open", // "open" | "matched" | "closed"
+  "client": {
+    "name": "Jordan",
+    "email": "jordan@example.com",
+    "phone": "(555) 111-2222"
+  },
+  "property": {
+    "address": "123 Main St",
+    "cityZip": "Irvine, 92617",
+    "type": "House",
+    "beds": 3, "baths": 2, "sqft": 1650
+  },
+  "schedule": {
+    "preferredDate": "2025-08-26",
+    "altDate": "2025-08-27"
+  },
+  "budget": 400,
+  "notes": "Need fast turnaround on report.",
+  "interestCount": 2,
+  "interestedInspectorIds": ["demo_inspector_1"]
+}
+
+Inspector profile (local-only, one at a time for demo):
+{
+  "id": "demo_inspector_1",
+  "displayName": "Ava Patel",
+  "serviceAreas": ["Irvine","Tustin"],
+  "specialties": ["Roof","Foundation"],
+  "basePrice": 350
+}
+
+## State & storage
+- Implement a small `useLocalStore()` hook:
+  - `requests` array (seed from requests.example.json on first run)
+  - `inspectorProfile`
+  - `role` ("client" | "inspector")
+  - Helpers: addRequest(), toggleInterest(requestId, inspectorId), setRole(), updateInspectorProfile()
+- Keep all storage in localStorage; no server.
+
+## UI components
+- RequestCard: compact summary for lists
+- RequestFilters: city/zip text input, propertyType select, earliestDate date input
+- InterestButton: "I'm Interested" toggle with count badge
+- RoleSwitch: header control
+- ProfileEditor: basic form in /inspector
+
+## Minimal styling
+- Match existing design system (Tailwind or current CSS).
+- Use responsive cards and simple grid on /requests.
+
+## Acceptance criteria
+- Client can create a request at "/post"; it appears in "/requests".
+- Inspectors can browse "/requests", filter, view details, and toggle "I'm Interested".
+- Interest persists across reloads (localStorage).
+- Inspector dashboard shows "My Interests" populated.
+- Header role switch updates CTAs and nav.
+
+## Implementation notes
+- Don’t add real auth; keep the demo "inspectorId" constant (e.g., "demo_inspector_1").
+- Obfuscate client email in lists (e.g., j***@example.com). Show full contact only in detail page as disabled text with tooltip "Shared after client accepts".
+- Keep existing buyer directory/routes untouched.
+- Add a small badge "New" on freshly created requests (createdAt within last 48h).
+- Include at least 3 seed requests in `requests.example.json`.
+
+Please generate or modify files:
+- src/store/localStore.ts (or .js)
+- src/pages/PostRequest.tsx
+- src/pages/RequestsList.tsx
+- src/pages/RequestDetail.tsx
+- src/pages/InspectorDashboard.tsx
+- src/components/RequestCard.tsx
+- src/components/RoleSwitch.tsx
+- src/components/InterestButton.tsx
+- src/components/ProfileEditor.tsx
+- src/data/requests.example.json
+- Update App routes and Header to include role switch and new pages.
