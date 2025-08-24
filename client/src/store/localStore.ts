@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getSession, findUserById } from '@/auth/storage';
 
 export interface Request {
   id: string;
@@ -80,10 +81,32 @@ const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
 
 const STORAGE_KEY = 'inspect_now_store';
 
+// Helper function to get user-specific storage key
+function getUserStorageKey(userEmail?: string): string {
+  if (!userEmail) return STORAGE_KEY;
+  return `${STORAGE_KEY}_${userEmail}`;
+}
+
 export function useLocalStore() {
-  const [store, setStore] = useState<LocalStore>(() => {
+  // Get current user email from session
+  const getCurrentUserEmail = () => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const session = getSession();
+      if (session) {
+        const user = findUserById(session.userId);
+        return user?.email;
+      }
+    } catch (error) {
+      console.error('Error getting current user:', error);
+    }
+    return undefined;
+  };
+
+  const [store, setStore] = useState<LocalStore>(() => {
+    const userEmail = getCurrentUserEmail();
+    const storageKey = getUserStorageKey(userEmail);
+    try {
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         
@@ -92,7 +115,7 @@ export function useLocalStore() {
             parsed.requests?.some((r: any) => r.interestedInspectorIds) ||
             parsed.requests?.some((r: any) => r.targetInspectorId)) {
           console.log('Old data format detected, clearing for fresh start');
-          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(storageKey);
           localStorage.removeItem('inspect_now_users');
           localStorage.removeItem('inspect_now_session');
         } else {
@@ -113,8 +136,10 @@ export function useLocalStore() {
 
   // Clear all data function
   const clearAllData = () => {
+    const userEmail = getCurrentUserEmail();
+    const storageKey = getUserStorageKey(userEmail);
     // Clear inspector/request data
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(storageKey);
     // Clear user accounts and sessions 
     localStorage.removeItem('inspect_now_users');
     localStorage.removeItem('inspect_now_session');
@@ -128,8 +153,10 @@ export function useLocalStore() {
 
   // Save to localStorage whenever store changes
   useEffect(() => {
+    const userEmail = getCurrentUserEmail();
+    const storageKey = getUserStorageKey(userEmail);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+      localStorage.setItem(storageKey, JSON.stringify(store));
     } catch (error) {
       console.error('Error saving to localStorage:', error);
     }
@@ -146,13 +173,15 @@ export function useLocalStore() {
     
     // Try direct localStorage manipulation as backup
     try {
-      const currentData = localStorage.getItem(STORAGE_KEY);
+      const userEmail = getCurrentUserEmail();
+      const storageKey = getUserStorageKey(userEmail);
+      const currentData = localStorage.getItem(storageKey);
       const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
       const updatedData = {
         ...parsed,
         requests: [newRequest, ...parsed.requests]
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+      localStorage.setItem(storageKey, JSON.stringify(updatedData));
       
       // Force React to re-read from localStorage
       setStore(updatedData);
@@ -172,7 +201,9 @@ export function useLocalStore() {
     
     // Direct localStorage manipulation to ensure persistence
     try {
-      const currentData = localStorage.getItem(STORAGE_KEY);
+      const userEmail = getCurrentUserEmail();
+      const storageKey = getUserStorageKey(userEmail);
+      const currentData = localStorage.getItem(storageKey);
       const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
       
       const updatedRequests = parsed.requests.map((req: Request) => {
@@ -206,7 +237,7 @@ export function useLocalStore() {
         requests: updatedRequests
       };
       
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+      localStorage.setItem(storageKey, JSON.stringify(updatedData));
       console.log('toggleInterest - Direct localStorage save successful');
       
       // Force React to re-read from localStorage
