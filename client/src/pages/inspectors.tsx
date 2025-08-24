@@ -5,29 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Briefcase, MapPin, DollarSign, Calendar } from "lucide-react";
+import { mockInspectors, type Inspector } from "@/data/mockInspectors";
 
-interface Inspector {
-  id: string;
-  name: string;
-  licenseNumber: string;
-  serviceAreas: string[];
-  basePrice: number;
-  experienceYears: number;
-  rating: number;
-  reviewCount: number;
-  nextAvailability: string;
-  photoUrl: string;
-}
 
 export default function Inspectors() {
   const [inspectors, setInspectors] = useState<Inspector[]>([]);
 
   useEffect(() => {
-    // Load inspector data from JSON file
-    fetch("/src/data/inspectors.json")
-      .then(response => response.json())
-      .then(data => setInspectors(data.inspectors))
-      .catch(error => console.error("Error loading inspector data:", error));
+    // Load mock inspector data
+    setInspectors(mockInspectors.inspectors);
   }, []);
 
   const renderStars = (rating: number) => {
@@ -59,7 +45,7 @@ export default function Inspectors() {
         {/* Directory Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-secondary mb-2" data-testid="text-inspectors-title">
-            Inspectors near Irvine
+            Licensed Home Inspectors
           </h1>
           <p className="text-muted" data-testid="text-inspectors-count">
             {inspectors.length} licensed inspectors available
@@ -73,7 +59,7 @@ export default function Inspectors() {
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4 mb-4">
                   <img 
-                    src={inspector.photoUrl} 
+                    src={inspector.image} 
                     alt={`${inspector.name} Profile Photo`} 
                     className="w-16 h-16 rounded-full object-cover"
                     data-testid={`img-inspector-${inspector.id}`}
@@ -82,8 +68,8 @@ export default function Inspectors() {
                     <h3 className="text-lg font-semibold text-secondary" data-testid={`text-inspector-name-${inspector.id}`}>
                       {inspector.name}
                     </h3>
-                    <p className="text-sm text-muted" data-testid={`text-inspector-license-${inspector.id}`}>
-                      License #{inspector.licenseNumber}
+                    <p className="text-sm text-muted" data-testid={`text-inspector-location-${inspector.id}`}>
+                      {inspector.location}
                     </p>
                     <div className="flex items-center mt-1">
                       <div className="flex">
@@ -100,7 +86,7 @@ export default function Inspectors() {
                   <div className="flex items-center text-sm text-muted">
                     <Briefcase className="w-4 h-4 mr-2" />
                     <span data-testid={`text-inspector-experience-${inspector.id}`}>
-                      {inspector.experienceYears} years experience
+                      {inspector.yearsExperience} years experience
                     </span>
                   </div>
                   <div className="flex items-center text-sm text-muted">
@@ -119,7 +105,7 @@ export default function Inspectors() {
                   <div className="flex items-center text-sm text-accent">
                     <Calendar className="w-4 h-4 mr-2" />
                     <span data-testid={`text-inspector-availability-${inspector.id}`}>
-                      {inspector.nextAvailability}
+                      {inspector.availability.nextAvailable}
                     </span>
                   </div>
                 </div>
