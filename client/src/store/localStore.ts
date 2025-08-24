@@ -434,7 +434,11 @@ export function useLocalStore() {
 
   // Get requests created by a specific client (by email)
   const getClientRequests = (clientEmail: string) => {
-    return store.requests.filter(req => req.client.email === clientEmail);
+    // Show ALL requests created by this client (both open_request and client_request types)
+    return store.requests.filter(req => 
+      req.client.email === clientEmail && 
+      (req.type === 'open_request' || req.type === 'client_request')
+    );
   };
 
   // Update a request (only if it belongs to the client)
