@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStore } from '@/store/localStore';
+import { useAuth } from '@/auth/AuthProvider';
 import { FileText, MapPin, Calendar, Home } from 'lucide-react';
 
 const requestSchema = z.object({
@@ -39,12 +40,13 @@ export default function PostRequest() {
   const [, setLocation] = useLocation();
   const { addRequest } = useLocalStore();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<RequestFormData>({
     resolver: zodResolver(requestSchema),
     defaultValues: {
-      clientName: '',
-      clientEmail: '',
+      clientName: user?.name || '',
+      clientEmail: user?.email || '',
       clientPhone: '',
       propertyAddress: '',
       cityZip: '',
@@ -55,6 +57,14 @@ export default function PostRequest() {
       notes: ''
     }
   });
+
+  // Update form when user data loads
+  useEffect(() => {
+    if (user) {
+      form.setValue('clientName', user.name || '');
+      form.setValue('clientEmail', user.email || '');
+    }
+  }, [user, form]);
 
   const onSubmit = (data: RequestFormData) => {
     try {
