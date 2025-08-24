@@ -80,8 +80,9 @@ const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
 };
 
 const STORAGE_KEY = 'inspect_now_store';
+const SHARED_REQUESTS_KEY = 'inspect_now_shared_requests'; // Shared across all users
 
-// Helper function to get user-specific storage key
+// Helper function to get user-specific storage key for profiles only
 function getUserStorageKey(userEmail?: string): string {
   if (!userEmail) return STORAGE_KEY;
   return `${STORAGE_KEY}_${userEmail}`;
@@ -104,42 +105,57 @@ export function useLocalStore() {
 
   const [store, setStore] = useState<LocalStore>(() => {
     const userEmail = getCurrentUserEmail();
-    const storageKey = getUserStorageKey(userEmail);
+    const userStorageKey = getUserStorageKey(userEmail);
+    
+    // Load shared requests (accessible to all users)
+    let sharedRequests = [];
     try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        
+      const savedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      if (savedRequests) {
+        const parsed = JSON.parse(savedRequests);
         // Clear old incompatible data format
-        if (parsed.inspectorProfile?.id || 
-            parsed.requests?.some((r: any) => r.interestedInspectorIds) ||
-            parsed.requests?.some((r: any) => r.targetInspectorId)) {
-          console.log('Old data format detected, clearing for fresh start');
-          localStorage.removeItem(storageKey);
-          localStorage.removeItem('inspect_now_users');
-          localStorage.removeItem('inspect_now_session');
+        if (parsed.some && parsed.some((r: any) => r.interestedInspectorIds || r.targetInspectorId)) {
+          console.log('Old request format detected, clearing');
+          localStorage.removeItem(SHARED_REQUESTS_KEY);
         } else {
-          return parsed;
+          sharedRequests = Array.isArray(parsed) ? parsed : [];
         }
       }
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
+      console.error('Error loading shared requests:', error);
     }
     
-    // Start with completely empty data
+    // Load user-specific data (profiles)
+    let userProfiles = { inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
+    try {
+      const savedUserData = localStorage.getItem(userStorageKey);
+      if (savedUserData) {
+        const parsed = JSON.parse(savedUserData);
+        if (parsed.inspectorProfile && parsed.allInspectorProfiles) {
+          userProfiles = {
+            inspectorProfile: parsed.inspectorProfile,
+            allInspectorProfiles: parsed.allInspectorProfiles
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+    
     return {
-      requests: [],
-      inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
-      allInspectorProfiles: []
+      requests: sharedRequests,
+      inspectorProfile: userProfiles.inspectorProfile,
+      allInspectorProfiles: userProfiles.allInspectorProfiles
     };
   });
 
   // Clear all data function
   const clearAllData = () => {
     const userEmail = getCurrentUserEmail();
-    const storageKey = getUserStorageKey(userEmail);
-    // Clear inspector/request data
-    localStorage.removeItem(storageKey);
+    const userStorageKey = getUserStorageKey(userEmail);
+    // Clear shared requests and user-specific data
+    localStorage.removeItem(SHARED_REQUESTS_KEY);
+    localStorage.removeItem(userStorageKey);
     // Clear user accounts and sessions 
     localStorage.removeItem('inspect_now_users');
     localStorage.removeItem('inspect_now_session');
@@ -154,9 +170,18 @@ export function useLocalStore() {
   // Save to localStorage whenever store changes
   useEffect(() => {
     const userEmail = getCurrentUserEmail();
-    const storageKey = getUserStorageKey(userEmail);
+    const userStorageKey = getUserStorageKey(userEmail);
+    
     try {
-      localStorage.setItem(storageKey, JSON.stringify(store));
+      // Save shared requests (accessible to all users)
+      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(store.requests));
+      
+      // Save user-specific data (profiles only)
+      const userData = {
+        inspectorProfile: store.inspectorProfile,
+        allInspectorProfiles: store.allInspectorProfiles
+      };
+      localStorage.setItem(userStorageKey, JSON.stringify(userData));
     } catch (error) {
       console.error('Error saving to localStorage:', error);
     }
@@ -171,20 +196,18 @@ export function useLocalStore() {
       interestedInspectorEmails: []
     };
     
-    // Try direct localStorage manipulation as backup
+    // Update shared requests directly
     try {
-      const userEmail = getCurrentUserEmail();
-      const storageKey = getUserStorageKey(userEmail);
-      const currentData = localStorage.getItem(storageKey);
-      const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
-      const updatedData = {
-        ...parsed,
-        requests: [newRequest, ...parsed.requests]
-      };
-      localStorage.setItem(storageKey, JSON.stringify(updatedData));
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = [newRequest, ...existingRequests];
+      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
       
-      // Force React to re-read from localStorage
-      setStore(updatedData);
+      // Update state
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
     } catch (error) {
       // Fallback to regular state update if localStorage fails
       setStore(prev => ({
@@ -201,12 +224,10 @@ export function useLocalStore() {
     
     // Direct localStorage manipulation to ensure persistence
     try {
-      const userEmail = getCurrentUserEmail();
-      const storageKey = getUserStorageKey(userEmail);
-      const currentData = localStorage.getItem(storageKey);
-      const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
+      const currentData = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const parsed = currentData ? JSON.parse(currentData) : [];
       
-      const updatedRequests = parsed.requests.map((req: Request) => {
+      const updatedRequests = parsed.map((req: Request) => {
         if (req.id === requestId) {
           const isInterested = req.interestedInspectorEmails.includes(inspectorEmail);
           const interestedInspectorEmails = isInterested
@@ -232,16 +253,14 @@ export function useLocalStore() {
         return req;
       });
       
-      const updatedData = {
-        ...parsed,
-        requests: updatedRequests
-      };
-      
-      localStorage.setItem(storageKey, JSON.stringify(updatedData));
+      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
       console.log('toggleInterest - Direct localStorage save successful');
       
       // Force React to re-read from localStorage
-      setStore(updatedData);
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
       console.log('toggleInterest - Forced store update');
       
     } catch (error) {
