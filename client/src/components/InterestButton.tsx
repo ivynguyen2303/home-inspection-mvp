@@ -14,6 +14,9 @@ export function InterestButton({ requestId, interestCount, className }: Interest
   
   const request = requests.find(r => r.id === requestId);
   const isInterested = request?.interestedInspectorIds.includes(inspectorProfile.id) || false;
+  
+  // Use the actual interestCount from the store to ensure it's always current
+  const currentInterestCount = request?.interestCount || interestCount;
 
   const handleToggle = () => {
     toggleInterest(requestId, inspectorProfile.id);
@@ -35,9 +38,9 @@ export function InterestButton({ requestId, interestCount, className }: Interest
         <Heart className={`w-4 h-4 ${isInterested ? 'fill-current' : ''}`} />
         <span>{isInterested ? 'Interested' : 'I\'m Interested'}</span>
       </Button>
-      {interestCount > 0 && (
+      {currentInterestCount > 0 && (
         <Badge variant="secondary" className="bg-red-100 text-red-800 flex items-center gap-1 whitespace-nowrap" data-testid={`badge-interest-count-${requestId}`}>
-          <span>{interestCount}</span>
+          <span>{currentInterestCount}</span>
           <span>❤</span>
         </Badge>
       )}

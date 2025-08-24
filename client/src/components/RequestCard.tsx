@@ -107,6 +107,7 @@ export function RequestCard({ request }: RequestCardProps) {
           </div>
           
           <InterestButton 
+            key={`interest-${request.id}-${request.interestCount}`}
             requestId={request.id} 
             interestCount={request.interestCount}
           />
