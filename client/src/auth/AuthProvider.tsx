@@ -94,7 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Redirect based on role
       if (user.role === 'client') {
-        setLocation('/post');
+        setLocation('/inspectors');
       } else {
         setLocation('/inspector');
       }
@@ -157,7 +157,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Redirect based on role
       if (user.role === 'client') {
-        setLocation('/post');
+        setLocation('/inspectors');
       } else {
         setLocation('/inspector');
       }
