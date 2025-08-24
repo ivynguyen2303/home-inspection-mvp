@@ -51,7 +51,7 @@ export default function InspectorProfile() {
   const [loading, setLoading] = useState(true);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { getInspectorProfileById, createBookingFromTimeSlot } = useLocalStore();
+  const { getInspectorProfileByEmail, createBookingFromTimeSlot } = useLocalStore();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -83,12 +83,12 @@ export default function InspectorProfile() {
   useEffect(() => {
     if (!match || !params?.id) return;
 
-    // Find real inspector profile
-    const foundInspector = getInspectorProfileById(params.id);
+    // Find real inspector profile by email
+    const foundInspector = getInspectorProfileByEmail(decodeURIComponent(params.id || ''));
     
     setInspector(foundInspector || null);
     setLoading(false);
-  }, [match, params?.id, getInspectorProfileById]);
+  }, [match, params?.id, getInspectorProfileByEmail]);
 
   const handleTimeSlotSelect = (timeSlotId: string) => {
     if (!user) {
@@ -117,7 +117,7 @@ export default function InspectorProfile() {
     if (!selectedTimeSlot || !params?.id) return;
 
     try {
-      const requestId = createBookingFromTimeSlot(selectedTimeSlot, params.id, {
+      const requestId = createBookingFromTimeSlot(selectedTimeSlot, decodeURIComponent(params.id || ''), {
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -140,7 +140,7 @@ export default function InspectorProfile() {
       form.reset();
       
       // Refresh inspector data to show updated availability
-      const updatedInspector = getInspectorProfileById(params.id);
+      const updatedInspector = getInspectorProfileByEmail(decodeURIComponent(params.id || ''));
       setInspector(updatedInspector || null);
     } catch (error) {
       toast({

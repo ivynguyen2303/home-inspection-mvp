@@ -108,27 +108,27 @@ export default function Inspectors() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {inspectors.map((inspector) => (
-            <Card key={inspector.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow" data-testid={`card-inspector-${inspector.id}`}>
+            <Card key={inspector.email} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow" data-testid={`card-inspector-${inspector.email}`}>
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4 mb-4">
                   <img 
                     src={inspector.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face'} 
                     alt={`${inspector.displayName} Profile Photo`} 
                     className="w-16 h-16 rounded-full object-cover"
-                    data-testid={`img-inspector-${inspector.id}`}
+                    data-testid={`img-inspector-${inspector.email}`}
                   />
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-secondary" data-testid={`text-inspector-name-${inspector.id}`}>
+                    <h3 className="text-lg font-semibold text-secondary" data-testid={`text-inspector-name-${inspector.email}`}>
                       {inspector.displayName}
                     </h3>
-                    <p className="text-sm text-muted" data-testid={`text-inspector-location-${inspector.id}`}>
+                    <p className="text-sm text-muted" data-testid={`text-inspector-location-${inspector.email}`}>
                       {inspector.location || 'San Francisco, CA'}
                     </p>
                     <div className="flex items-center mt-1">
                       <div className="flex">
                         {renderStars(inspector.rating || 5.0)}
                       </div>
-                      <span className="ml-2 text-sm text-muted" data-testid={`text-inspector-rating-${inspector.id}`}>
+                      <span className="ml-2 text-sm text-muted" data-testid={`text-inspector-rating-${inspector.email}`}>
                         {inspector.rating || 5.0} ({inspector.reviewCount || 0} reviews)
                       </span>
                     </div>
@@ -138,35 +138,35 @@ export default function Inspectors() {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center text-sm text-muted">
                     <Briefcase className="w-4 h-4 mr-2" />
-                    <span data-testid={`text-inspector-experience-${inspector.id}`}>
+                    <span data-testid={`text-inspector-experience-${inspector.email}`}>
                       {inspector.yearsExperience || 1} years experience
                     </span>
                   </div>
                   <div className="flex items-center text-sm text-muted">
                     <MapPin className="w-4 h-4 mr-2" />
-                    <span className="truncate" data-testid={`text-inspector-areas-${inspector.id}`}>
+                    <span className="truncate" data-testid={`text-inspector-areas-${inspector.email}`}>
                       {inspector.serviceAreas.join(", ")}
                     </span>
                   </div>
                   <div className="flex items-center text-sm text-muted">
                     <DollarSign className="w-4 h-4 mr-2" />
                     <span>Starting at </span>
-                    <span className="font-semibold text-secondary ml-1" data-testid={`text-inspector-price-${inspector.id}`}>
+                    <span className="font-semibold text-secondary ml-1" data-testid={`text-inspector-price-${inspector.email}`}>
                       ${inspector.basePrice}
                     </span>
                   </div>
                   <div className="flex items-center text-sm text-accent">
                     <Calendar className="w-4 h-4 mr-2" />
-                    <span data-testid={`text-inspector-availability-${inspector.id}`}>
+                    <span data-testid={`text-inspector-availability-${inspector.email}`}>
                       {inspector.availability?.nextAvailable || 'This week'}
                     </span>
                   </div>
                 </div>
                 
-                <Link href={`/inspectors/${inspector.id}`}>
+                <Link href={`/inspectors/${encodeURIComponent(inspector.email)}`}>
                   <Button 
                     className="w-full bg-primary hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-                    data-testid={`button-view-profile-${inspector.id}`}
+                    data-testid={`button-view-profile-${inspector.email}`}
                   >
                     View Profile
                   </Button>
