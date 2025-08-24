@@ -17,17 +17,9 @@ export default function InspectorDashboard() {
   const openRequests = requests.filter(req => 
     req.status === 'open' && req.type === 'open_request'
   );
-  
-  // Debug client request filtering
-  console.log('Inspector Dashboard - All requests:', requests);
-  console.log('Inspector Dashboard - Inspector profile ID:', inspectorProfile.id);
-  console.log('Inspector Dashboard - Looking for client_request type with targetInspectorId:', inspectorProfile.id);
-  
-  const clientRequests = requests.filter(req => {
-    const match = req.status === 'open' && req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id;
-    console.log(`Request ${req.id}: status=${req.status}, type=${req.type}, targetInspectorId=${req.targetInspectorId}, matches=${match}`);
-    return match;
-  });
+  const clientRequests = requests.filter(req => 
+    req.status === 'open' && req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id
+  );
   const myInterests = getMyInterests();
 
   return (
