@@ -6,17 +6,25 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Calendar } from '@/components/ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalStore } from '@/store/localStore';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Calendar, Clock, Plus, Trash2, Edit } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, Trash2, Edit } from 'lucide-react';
+import { format } from 'date-fns';
 
 const timeSlotSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
-  startTime: z.string().min(1, 'Start time is required'),
-  endTime: z.string().min(1, 'End time is required')
+  date: z.date({
+    required_error: "Please select a date.",
+  }),
+  startHour: z.string().min(1, 'Start hour is required'),
+  startPeriod: z.enum(['AM', 'PM']),
+  endHour: z.string().min(1, 'End hour is required'),
+  endPeriod: z.enum(['AM', 'PM'])
 });
 
 type TimeSlotFormData = z.infer<typeof timeSlotSchema>;
@@ -30,20 +38,43 @@ export function AvailabilityManager() {
   const form = useForm<TimeSlotFormData>({
     resolver: zodResolver(timeSlotSchema),
     defaultValues: {
-      date: '',
-      startTime: '',
-      endTime: ''
+      date: undefined,
+      startHour: '',
+      startPeriod: 'AM',
+      endHour: '',
+      endPeriod: 'AM'
     }
   });
 
   const timeSlots = inspectorProfile.availability?.timeSlots || [];
 
+  const convertTo24Hour = (hour: string, period: 'AM' | 'PM') => {
+    const hourNum = parseInt(hour);
+    if (period === 'AM') {
+      return hourNum === 12 ? '00:00' : `${hourNum.toString().padStart(2, '0')}:00`;
+    } else {
+      return hourNum === 12 ? '12:00' : `${(hourNum + 12).toString().padStart(2, '0')}:00`;
+    }
+  };
+
+  const convertTo12Hour = (time: string) => {
+    const [hour, minute] = time.split(':');
+    const hourNum = parseInt(hour);
+    if (hourNum === 0) return { hour: '12', period: 'AM' };
+    if (hourNum < 12) return { hour: hourNum.toString(), period: 'AM' };
+    if (hourNum === 12) return { hour: '12', period: 'PM' };
+    return { hour: (hourNum - 12).toString(), period: 'PM' };
+  };
+
   const addTimeSlot = (data: TimeSlotFormData) => {
+    const startTime = convertTo24Hour(data.startHour, data.startPeriod);
+    const endTime = convertTo24Hour(data.endHour, data.endPeriod);
+    
     const newSlot = {
       id: `slot_${Date.now()}`,
-      date: data.date,
-      startTime: data.startTime,
-      endTime: data.endTime,
+      date: format(data.date, 'yyyy-MM-dd'),
+      startTime,
+      endTime,
       available: true
     };
 
@@ -60,10 +91,16 @@ export function AvailabilityManager() {
 
     toast({
       title: "Time Slot Added",
-      description: `Added ${data.date} ${data.startTime}-${data.endTime}`,
+      description: `Added ${format(data.date, 'MMM dd, yyyy')} ${data.startHour}:00 ${data.startPeriod}-${data.endHour}:00 ${data.endPeriod}`,
     });
 
-    form.reset();
+    form.reset({
+      date: undefined,
+      startHour: '',
+      startPeriod: 'AM',
+      endHour: '',
+      endPeriod: 'AM'
+    });
     setDialogOpen(false);
   };
 
@@ -161,7 +198,7 @@ export function AvailabilityManager() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center">
-              <Calendar className="mr-2 h-5 w-5" />
+              <CalendarIcon className="mr-2 h-5 w-5" />
               Available Time Slots
             </CardTitle>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -181,42 +218,140 @@ export function AvailabilityManager() {
                       control={form.control}
                       name="date"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel>Date</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="e.g., Mon Dec 30, Tue Jan 7" data-testid="input-slot-date" />
-                          </FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
+                                  data-testid="button-slot-date"
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date < new Date(new Date().setHours(0, 0, 0, 0))
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="startTime"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Start Time</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="e.g., 9:00 AM" data-testid="input-slot-start-time" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="endTime"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>End Time</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="e.g., 11:00 AM" data-testid="input-slot-end-time" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <FormField
+                          control={form.control}
+                          name="startHour"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Start Hour</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-start-hour">
+                                    <SelectValue placeholder="Hour" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
+                                    <SelectItem key={hour} value={hour.toString()}>
+                                      {hour}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="startPeriod"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Period</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-start-period">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="AM">AM</SelectItem>
+                                  <SelectItem value="PM">PM</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <FormField
+                          control={form.control}
+                          name="endHour"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>End Hour</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-end-hour">
+                                    <SelectValue placeholder="Hour" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
+                                    <SelectItem key={hour} value={hour.toString()}>
+                                      {hour}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="endPeriod"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Period</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-end-period">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="AM">AM</SelectItem>
+                                  <SelectItem value="PM">PM</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                     <div className="flex justify-end space-x-2">
                       <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} data-testid="button-cancel-slot">
@@ -233,7 +368,7 @@ export function AvailabilityManager() {
         <CardContent>
           {timeSlots.length === 0 ? (
             <div className="text-center py-8">
-              <Calendar className="mx-auto h-12 w-12 text-muted mb-4" />
+              <CalendarIcon className="mx-auto h-12 w-12 text-muted mb-4" />
               <h3 className="text-lg font-medium text-secondary mb-2">No time slots available</h3>
               <p className="text-muted mb-4">Add your available time slots so clients can book directly with you.</p>
               <Button onClick={() => setDialogOpen(true)} data-testid="button-add-first-slot">
@@ -253,10 +388,22 @@ export function AvailabilityManager() {
                   }`}
                 >
                   <div className="flex items-center">
-                    <Calendar className="h-4 w-4 text-muted mr-3" />
+                    <CalendarIcon className="h-4 w-4 text-muted mr-3" />
                     <div>
-                      <div className="font-medium text-secondary">{slot.date}</div>
-                      <div className="text-sm text-muted">{slot.startTime} - {slot.endTime}</div>
+                      <div className="font-medium text-secondary">
+                        {new Date(slot.date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                      <div className="text-sm text-muted">
+                        {(() => {
+                          const start = convertTo12Hour(slot.startTime);
+                          const end = convertTo12Hour(slot.endTime);
+                          return `${start.hour}:00 ${start.period} - ${end.hour}:00 ${end.period}`;
+                        })()}
+                      </div>
                     </div>
                     <Badge 
                       variant={slot.available ? "default" : "secondary"}
