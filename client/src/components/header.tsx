@@ -45,7 +45,7 @@ export function Header() {
                     <>
                       <Link 
                         href="/inspectors" 
-                        className="text-secondary hover:text-primary font-medium transition-colors"
+                        className="bg-primary hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium transition-colors text-sm"
                         data-testid="link-find-inspectors"
                       >
                         Find Inspectors
