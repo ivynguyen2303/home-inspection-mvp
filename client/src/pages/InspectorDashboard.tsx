@@ -28,6 +28,17 @@ export default function InspectorDashboard() {
                           inspectorProfile.id && 
                           String(req.targetInspectorId) === String(inspectorProfile.id);
     
+    // Debug logging to understand the mismatch
+    if (isOpen && isClientRequest) {
+      console.log('Client request debug:', {
+        requestId: req.id,
+        targetInspectorId: req.targetInspectorId,
+        currentInspectorId: inspectorProfile.id,
+        idsMatch: String(req.targetInspectorId) === String(inspectorProfile.id),
+        request: req
+      });
+    }
+    
     return isOpen && isClientRequest && isTargetedToMe;
   });
   const myInterests = getMyInterests();
