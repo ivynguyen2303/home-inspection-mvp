@@ -152,24 +152,54 @@ export function useLocalStore() {
   };
 
   const toggleInterest = (requestId: string, inspectorId: string) => {
-    setStore(prev => ({
-      ...prev,
-      requests: prev.requests.map(req => {
+    console.log('toggleInterest called for:', { requestId, inspectorId });
+    
+    // Direct localStorage manipulation to ensure persistence
+    try {
+      const currentData = localStorage.getItem(STORAGE_KEY);
+      const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
+      
+      const updatedRequests = parsed.requests.map((req: Request) => {
         if (req.id === requestId) {
           const isInterested = req.interestedInspectorIds.includes(inspectorId);
           const interestedInspectorIds = isInterested
-            ? req.interestedInspectorIds.filter(id => id !== inspectorId)
+            ? req.interestedInspectorIds.filter((id: string) => id !== inspectorId)
             : [...req.interestedInspectorIds, inspectorId];
           
-          return {
+          const updatedRequest = {
             ...req,
             interestedInspectorIds,
             interestCount: interestedInspectorIds.length
           };
+          
+          console.log('toggleInterest - Updated request:', {
+            id: requestId,
+            wasInterested: isInterested,
+            nowInterested: !isInterested,
+            newCount: interestedInspectorIds.length,
+            interestedInspectorIds
+          });
+          
+          return updatedRequest;
         }
         return req;
-      })
-    }));
+      });
+      
+      const updatedData = {
+        ...parsed,
+        requests: updatedRequests
+      };
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+      console.log('toggleInterest - Direct localStorage save successful');
+      
+      // Force React to re-read from localStorage
+      setStore(updatedData);
+      console.log('toggleInterest - Forced store update');
+      
+    } catch (error) {
+      console.error('toggleInterest - localStorage backup failed:', error);
+    }
   };
 
 
