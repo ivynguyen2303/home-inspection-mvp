@@ -120,6 +120,7 @@ export function useLocalStore() {
   }, [store]);
 
   const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorIds'>) => {
+    console.log('addRequest called with:', requestData);
     const newRequest: Request = {
       ...requestData,
       id: `req_${Date.now()}`,
@@ -127,11 +128,16 @@ export function useLocalStore() {
       interestCount: 0,
       interestedInspectorIds: []
     };
+    console.log('Created new request:', newRequest);
     
-    setStore(prev => ({
-      ...prev,
-      requests: [newRequest, ...prev.requests]
-    }));
+    setStore(prev => {
+      const updated = {
+        ...prev,
+        requests: [newRequest, ...prev.requests]
+      };
+      console.log('Updated store:', updated);
+      return updated;
+    });
     
     return newRequest.id;
   };

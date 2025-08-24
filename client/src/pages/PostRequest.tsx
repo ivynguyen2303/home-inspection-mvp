@@ -67,7 +67,9 @@ export default function PostRequest() {
   }, [user, form]);
 
   const onSubmit = (data: RequestFormData) => {
+    console.log('Form submitted with data:', data);
     try {
+      console.log('About to call addRequest...');
       const requestId = addRequest({
         status: 'open',
         type: 'open_request', // This is an open request visible to all inspectors
@@ -91,6 +93,7 @@ export default function PostRequest() {
         budget: data.budget,
         notes: data.notes || ''
       });
+      console.log('addRequest returned ID:', requestId);
 
       toast({
         title: "Request Posted!",
@@ -99,6 +102,7 @@ export default function PostRequest() {
 
       setLocation('/thanks');
     } catch (error) {
+      console.error('Error in onSubmit:', error);
       toast({
         title: "Error",
         description: "Failed to post request. Please try again.",
