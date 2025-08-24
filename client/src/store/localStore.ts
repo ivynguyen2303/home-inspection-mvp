@@ -224,6 +224,17 @@ export function useLocalStore() {
     });
   };
 
+  // Set the current inspector profile by user ID (for login)
+  const setCurrentInspectorProfile = (userId: string) => {
+    const profile = getInspectorProfileById(userId);
+    if (profile) {
+      setStore(prev => ({
+        ...prev,
+        inspectorProfile: profile
+      }));
+    }
+  };
+
   const addInspectorProfile = (profile: InspectorProfile) => {
     setStore(prev => ({
       ...prev,
@@ -504,6 +515,7 @@ export function useLocalStore() {
     addRequest,
     toggleInterest,
     updateInspectorProfile,
+    setCurrentInspectorProfile,
     addInspectorProfile,
     getAllInspectorProfiles,
     getInspectorProfileById,

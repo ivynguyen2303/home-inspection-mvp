@@ -37,7 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { updateInspectorProfile, addInspectorProfile, removeInspectorProfile } = useLocalStore();
+  const { updateInspectorProfile, addInspectorProfile, removeInspectorProfile, setCurrentInspectorProfile } = useLocalStore();
 
   // Initialize session on mount
   useEffect(() => {
@@ -64,6 +64,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     initAuth();
   }, []);
+
+  // Auto-load inspector profile when inspector logs in
+  useEffect(() => {
+    if (authState.user && authState.user.role === 'inspector') {
+      setCurrentInspectorProfile(authState.user.id);
+    }
+  }, [authState.user, setCurrentInspectorProfile]);
 
   const login = async (credentials: LoginCredentials): Promise<User> => {
     try {

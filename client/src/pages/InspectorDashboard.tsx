@@ -16,14 +16,6 @@ export default function InspectorDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('requests');
   
-  // Debug: Show what inspector is logged in
-  console.log('Inspector Dashboard - Login debug:', {
-    userEmail: user?.email,
-    userId: user?.id,
-    profileId: inspectorProfile.id,
-    profileName: inspectorProfile.displayName,
-    idsMatch: user?.id === inspectorProfile.id
-  });
   
   
   // Filter requests for this inspector only
