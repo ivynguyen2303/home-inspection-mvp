@@ -85,7 +85,7 @@ export function generateUserId(): string {
 }
 
 // Initialize demo accounts
-export function initializeDemoAccounts(): void {
+export async function initializeDemoAccounts(): Promise<void> {
   const users = getUsers();
   
   // Only initialize if no users exist
@@ -150,11 +150,11 @@ export function initializeDemoAccounts(): void {
     ];
 
     // Hash password for demo accounts: "DemoPass123"
-    Promise.all(demoAccounts.map(async (account) => {
+    const hashedAccounts = await Promise.all(demoAccounts.map(async (account) => {
       const passwordHash = await hashPassword('DemoPass123');
       return { ...account, passwordHash };
-    })).then(hashedAccounts => {
-      saveUsers(hashedAccounts);
-    });
+    }));
+    
+    saveUsers(hashedAccounts);
   }
 }
