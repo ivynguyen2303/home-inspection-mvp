@@ -1,0 +1,89 @@
+ [CLIENT BOOKING] Creating client request: 
+Object { id: "req_1756067970137", createdAt: "2025-08-24T20:39:30.137Z", status: "open", type: "client_request", targetInspectorEmail: "I2@gmail.com", client: {…}, property: {…}, schedule: {…}, notes: "Booking request for Mon Dec 30 2:00 PM-4:00 PM", interestCount: 1, … }
+Console.js:61:15
+📋 [CLIENT BOOKING] Saved to localStorage, total requests: 2 Console.js:61:15
+📋 [CLIENT BOOKING] Client request created successfully with ID: req_1756067970137 Console.js:61:15
+📋 [GET CLIENT REQUESTS] Looking for requests by email: C@gmail.com Console.js:61:15
+📋 [GET CLIENT REQUESTS] Total requests in store: 2 Console.js:61:15
+📋 [GET CLIENT REQUESTS] All requests: 
+Array [ {…}, {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Request check: 
+Object { requestId: "req_1756067970137", requestEmail: "C@gmail.com", clientEmail: "C@gmail.com", emailMatch: true, type: "client_request", typeMatch: true, finalMatch: true }
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Request check: 
+Object { requestId: "req_1756066846726", requestEmail: "C@gmail.com", clientEmail: "C@gmail.com", emailMatch: true, type: "open_request", typeMatch: true, finalMatch: true }
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Filtered results: 2 requests Console.js:61:15
+📋 [GET CLIENT REQUESTS] Results: 
+Array [ {…}, {…} ]
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Component rendered Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Total requests from store: 1 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] All requests: 
+Array [ {…} ]
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Inspector profile: 
+Object { email: "I2@gmail.com", displayName: "I2", serviceAreas: (1) […], specialties: [], basePrice: 400, location: "San Francisco, CA", bio: "Professional home inspector with expertise in residential property assessments.", yearsExperience: 1, certifications: (1) […], rating: 5, … }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Current user: 
+Object { id: "usr_cwmn51471", email: "I2@gmail.com", passwordHash: "932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef", role: "inspector", createdAt: "2025-08-24T19:49:18.417Z" }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Open requests filtered: 1 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Open requests: 
+Array [ {…} ]
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Checking client request: 
+Object { requestId: "req_1756066846726", status: "open", type: "open_request", targetInspectorEmail: undefined, myEmail: "I2@gmail.com", isOpen: true, isClientRequest: false, isTargetedToMe: undefined, finalMatch: false }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Client requests filtered: 0 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Client requests: 
+Array []
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] My interests: 0 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Component rendered Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Total requests from store: 1 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] All requests: 
+Array [ {…} ]
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Inspector profile: 
+Object { email: "I2@gmail.com", displayName: "I2", serviceAreas: (1) […], specialties: [], basePrice: 400, location: "San Francisco, CA", bio: "Professional home inspector with expertise in residential property assessments.", yearsExperience: 1, certifications: (1) […], rating: 5, … }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Current user: 
+Object { id: "usr_cwmn51471", email: "I2@gmail.com", passwordHash: "932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef", role: "inspector", createdAt: "2025-08-24T19:49:18.417Z" }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Open requests filtered: 1 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Open requests: 
+Array [ {…} ]
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Checking client request: 
+Object { requestId: "req_1756066846726", status: "open", type: "open_request", targetInspectorEmail: undefined, myEmail: "I2@gmail.com", isOpen: true, isClientRequest: false, isTargetedToMe: undefined, finalMatch: false }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Client requests filtered: 0 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Client requests: 
+Array []
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] My interests: 0 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Component rendered Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Total requests from store: 1 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] All requests: 
+Array [ {…} ]
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Inspector profile: 
+Object { email: "I2@gmail.com", displayName: "I2", serviceAreas: (1) […], specialties: [], basePrice: 400, location: "San Francisco, CA", bio: "Professional home inspector with expertise in residential property assessments.", yearsExperience: 1, certifications: (1) […], rating: 5, … }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Current user: 
+Object { id: "usr_cwmn51471", email: "I2@gmail.com", passwordHash: "932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef", role: "inspector", createdAt: "2025-08-24T19:49:18.417Z" }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Open requests filtered: 1 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Open requests: 
+Array [ {…} ]
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Checking client request: 
+Object { requestId: "req_1756066846726", status: "open", type: "open_request", targetInspectorEmail: undefined, myEmail: "I2@gmail.com", isOpen: true, isClientRequest: false, isTargetedToMe: undefined, finalMatch: false }
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Client requests filtered: 0 Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] Client requests: 
+Array []
+Console.js:61:15
+🏠 [INSPECTOR DASHBOARD] My interests: 0

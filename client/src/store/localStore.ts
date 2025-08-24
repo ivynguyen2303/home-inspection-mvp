@@ -111,22 +111,32 @@ export function useLocalStore() {
     // Load shared requests (accessible to all users)
     let sharedRequests = [];
     try {
+      console.log('🔍 [INIT DEBUG] Loading shared requests...');
       const savedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      console.log('🔍 [INIT DEBUG] Raw localStorage data:', savedRequests?.substring(0, 200) + '...');
       
       if (savedRequests) {
         const parsed = JSON.parse(savedRequests);
+        console.log('🔍 [INIT DEBUG] Parsed requests:', parsed.length, 'total');
+        console.log('🔍 [INIT DEBUG] Request IDs:', parsed.map((r: any) => r.id));
         
         // Only clear if we actually find the old problematic fields
         const hasOldFormat = Array.isArray(parsed) && parsed.some((r: any) => 
           r.hasOwnProperty('interestedInspectorIds') || r.hasOwnProperty('targetInspectorId')
         );
         
+        console.log('🔍 [INIT DEBUG] Has old format?', hasOldFormat);
+        
         if (hasOldFormat) {
+          console.log('🚨 [INIT DEBUG] Clearing old format data');
           localStorage.removeItem(SHARED_REQUESTS_KEY);
           sharedRequests = [];
         } else {
           sharedRequests = Array.isArray(parsed) ? parsed : [];
+          console.log('✅ [INIT DEBUG] Loaded', sharedRequests.length, 'shared requests');
         }
+      } else {
+        console.log('❌ [INIT DEBUG] No shared requests found in localStorage');
       }
     } catch (error) {
       console.error('🏪 [STORE INIT] Error loading shared requests:', error);
