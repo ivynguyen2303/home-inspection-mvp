@@ -16,31 +16,8 @@ import {
   Clock,
   Lock
 } from "lucide-react";
+import { mockInspectors, type Inspector } from "@/data/mockInspectors";
 
-interface Inspector {
-  id: string;
-  name: string;
-  licenseNumber: string;
-  serviceAreas: string[];
-  basePrice: number;
-  experienceYears: number;
-  rating: number;
-  reviewCount: number;
-  bio: string;
-  specialties: string[];
-  certification: string;
-  availability: Array<{
-    date: string;
-    dayName: string;
-    slots: string[];
-    status: "available" | "booked";
-  }>;
-  contact: {
-    email: string;
-    phone: string;
-  };
-  photoUrl: string;
-}
 
 export default function InspectorProfile() {
   const [match, params] = useRoute("/inspectors/:id");
@@ -50,18 +27,10 @@ export default function InspectorProfile() {
   useEffect(() => {
     if (!match || !params?.id) return;
 
-    // Load inspector data from JSON file
-    fetch("/src/data/inspectors.json")
-      .then(response => response.json())
-      .then(data => {
-        const foundInspector = data.inspectors.find((insp: Inspector) => insp.id === params.id);
-        setInspector(foundInspector || null);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error("Error loading inspector data:", error);
-        setLoading(false);
-      });
+    // Load mock inspector data
+    const foundInspector = mockInspectors.inspectors.find((insp: Inspector) => insp.id === params.id);
+    setInspector(foundInspector || null);
+    setLoading(false);
   }, [match, params?.id]);
 
   const renderStars = (rating: number) => {
@@ -120,7 +89,7 @@ export default function InspectorProfile() {
               <CardContent className="p-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                   <img 
-                    src={inspector.photoUrl} 
+                    src={inspector.image} 
                     alt={`${inspector.name} Profile Photo`} 
                     className="w-24 h-24 rounded-full object-cover"
                     data-testid="img-inspector-profile"
@@ -129,8 +98,8 @@ export default function InspectorProfile() {
                     <h1 className="text-3xl font-bold text-secondary mb-2" data-testid="text-inspector-name">
                       {inspector.name}
                     </h1>
-                    <p className="text-muted mb-2" data-testid="text-inspector-license">
-                      License #{inspector.licenseNumber}
+                    <p className="text-muted mb-2" data-testid="text-inspector-location">
+                      {inspector.location}
                     </p>
                     <div className="flex items-center mb-3">
                       <div className="flex mr-2">
@@ -146,11 +115,11 @@ export default function InspectorProfile() {
                     <div className="flex flex-wrap gap-4 text-sm">
                       <div className="flex items-center text-muted">
                         <Briefcase className="mr-1 h-4 w-4" />
-                        <span data-testid="text-inspector-experience">{inspector.experienceYears} years</span>
+                        <span data-testid="text-inspector-experience">{inspector.yearsExperience} years</span>
                       </div>
                       <div className="flex items-center text-muted">
                         <Tag className="mr-1 h-4 w-4" />
-                        <span data-testid="text-inspector-certification">{inspector.certification}</span>
+                        <span data-testid="text-inspector-certification">{inspector.certifications[0]}</span>
                       </div>
                       <div className="flex items-center text-accent">
                         <Shield className="mr-1 h-4 w-4" />
@@ -191,48 +160,25 @@ export default function InspectorProfile() {
               </CardContent>
             </Card>
 
-            {/* Availability Calendar */}
+            {/* Availability Info */}
             <Card className="bg-white rounded-xl shadow-lg">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-semibold text-secondary mb-6" data-testid="text-availability-title">Upcoming Availability</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {inspector.availability.map((slot, index) => (
-                    <div 
-                      key={index} 
-                      className={`border border-gray-200 rounded-lg p-4 transition-colors ${
-                        slot.status === "available" ? "hover:border-primary" : "opacity-60"
-                      }`}
-                      data-testid={`availability-slot-${index}`}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <div className="font-semibold text-secondary" data-testid={`slot-day-${index}`}>
-                            {slot.dayName}
-                          </div>
-                          <div className="text-sm text-muted" data-testid={`slot-date-${index}`}>
-                            {new Date(slot.date).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              year: 'numeric' 
-                            })}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`text-sm font-medium ${
-                            slot.status === "available" ? "text-accent" : "text-red-500"
-                          }`} data-testid={`slot-status-${index}`}>
-                            {slot.status === "available" ? "Available" : "Booked"}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted" data-testid={`slot-times-${index}`}>
-                        {slot.status === "available" && slot.slots.length > 0 
-                          ? slot.slots.join(", ")
-                          : "No availability"
-                        }
-                      </div>
-                    </div>
-                  ))}
+                <h2 className="text-2xl font-semibold text-secondary mb-6" data-testid="text-availability-title">Availability</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="text-center p-6 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-2xl font-bold text-green-700 mb-2">{inspector.availability.nextAvailable}</div>
+                    <div className="text-green-600">Next Available</div>
+                  </div>
+                  <div className="text-center p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-700 mb-2">{inspector.availability.responseTime}</div>
+                    <div className="text-blue-600">Response Time</div>
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-muted text-center">
+                    <Clock className="inline mr-1 h-4 w-4" />
+                    Schedule an inspection by contacting {inspector.name} directly
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -318,11 +264,11 @@ export default function InspectorProfile() {
                     <div className="text-xs text-muted">
                       <p className="mb-2">
                         <Clock className="inline mr-1 h-3 w-3" />
-                        Response time: Usually within 2 hours
+                        Response time: {inspector.availability.responseTime}
                       </p>
                       <p>
                         <Shield className="inline mr-1 h-3 w-3" />
-                        Licensed, insured, and bonded
+                        {inspector.insurance}
                       </p>
                     </div>
                   </div>
