@@ -120,6 +120,7 @@ export function useLocalStore() {
   }, [store]);
 
   const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorIds'>) => {
+    console.log('addRequest called with:', requestData);
     const newRequest: Request = {
       ...requestData,
       id: `req_${Date.now()}`,
@@ -127,6 +128,7 @@ export function useLocalStore() {
       interestCount: 0,
       interestedInspectorIds: []
     };
+    console.log('addRequest created request:', newRequest);
     
     setStore(prev => ({
       ...prev,
