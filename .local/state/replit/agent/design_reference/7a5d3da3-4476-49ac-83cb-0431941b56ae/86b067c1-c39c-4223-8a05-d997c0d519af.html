@@ -1,0 +1,783 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InspectNow - Find Home Inspectors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#475569',
+                        accent: '#10B981',
+                        muted: '#64748B'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans">
+
+<!-- @COMPONENT: App [React Router wrapper] -->
+<div id="app">
+
+    <!-- @COMPONENT: LandingPage [Landing route component] -->
+    <div id="landing-page" class="min-h-screen bg-white">
+        <!-- @COMPONENT: Header [Navigation header] -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <h1 class="text-2xl font-bold text-primary">
+                                <i class="fas fa-search-location mr-2"></i>
+                                InspectNow
+                            </h1>
+                        </div>
+                    </div>
+                    <nav class="flex space-x-8">
+                        <a href="#" class="text-secondary hover:text-primary font-medium transition-colors" data-event="click:navigateToInspectors">
+                            Find Inspectors
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <!-- @COMPONENT: Hero [Landing hero section] -->
+        <section class="bg-gradient-to-br from-primary to-blue-700 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div class="text-center">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                        Find a home inspector in minutes
+                    </h1>
+                    <p class="text-xl md:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto">
+                        Connect with licensed, experienced home inspectors in your area. Get detailed reports and peace of mind for your property purchase.
+                    </p>
+                    
+                    <!-- @COMPONENT: SearchForm [Search form component] -->
+                    <div class="max-w-2xl mx-auto">
+                        <div class="bg-white rounded-xl shadow-xl p-8">
+                            <form class="flex flex-col sm:flex-row gap-4" data-event="submit:handleSearchSubmit">
+                                <div class="flex-1">
+                                    <label for="location" class="sr-only">Enter city or ZIP code</label>
+                                    <div class="relative">
+                                        <i class="fas fa-map-marker-alt absolute left-4 top-1/2 transform -translate-y-1/2 text-muted"></i>
+                                        <input 
+                                            type="text" 
+                                            id="location" 
+                                            name="location"
+                                            placeholder="Enter city or ZIP code" 
+                                            class="w-full pl-12 pr-4 py-4 text-secondary border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
+                                            data-bind="searchLocation"
+                                            data-mock="true"
+                                        />
+                                    </div>
+                                </div>
+                                <button 
+                                    type="submit" 
+                                    class="bg-accent hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-lg transition-colors text-lg min-w-[160px]"
+                                    data-event="click:navigateToInspectors"
+                                    data-implementation="Should navigate to /inspectors route"
+                                >
+                                    <i class="fas fa-search mr-2"></i>
+                                    Search
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: SearchForm -->
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: Hero -->
+
+        <!-- @COMPONENT: Features [Features section] -->
+        <section class="py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4">Why Choose InspectNow?</h2>
+                    <p class="text-xl text-muted max-w-2xl mx-auto">Professional home inspection services you can trust</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center p-6">
+                        <div class="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-certificate text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-secondary mb-3">Licensed Professionals</h3>
+                        <p class="text-muted">All inspectors are licensed and certified with years of experience</p>
+                    </div>
+                    
+                    <div class="text-center p-6">
+                        <div class="w-16 h-16 bg-accent text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-clock text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-secondary mb-3">Fast Scheduling</h3>
+                        <p class="text-muted">Book inspections quickly with real-time availability</p>
+                    </div>
+                    
+                    <div class="text-center p-6">
+                        <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-file-alt text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-secondary mb-3">Detailed Reports</h3>
+                        <p class="text-muted">Comprehensive inspection reports with photos and recommendations</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: Features -->
+    </div>
+    <!-- @END_COMPONENT: LandingPage -->
+
+    <!-- @COMPONENT: InspectorsDirectory [Inspectors list route component] -->
+    <div id="inspectors-page" class="min-h-screen bg-gray-50" style="display: none;">
+        <!-- @COMPONENT: Header [Navigation header] -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <h1 class="text-2xl font-bold text-primary">
+                                <i class="fas fa-search-location mr-2"></i>
+                                InspectNow
+                            </h1>
+                        </div>
+                    </div>
+                    <nav class="flex space-x-8">
+                        <a href="#" class="text-secondary hover:text-primary font-medium transition-colors" data-event="click:navigateToHome">
+                            Home
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- @COMPONENT: DirectoryHeader [Directory page header] -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-secondary mb-2">Inspectors near Irvine</h1>
+                <p class="text-muted">
+                    <span data-bind="inspectors.length" data-mock="true">12</span> licensed inspectors available
+                </p>
+            </div>
+            <!-- @END_COMPONENT: DirectoryHeader -->
+
+            <!-- @COMPONENT: InspectorsList [Grid of inspector cards] -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- @MAP: inspectors.map(inspector => ( -->
+                
+                <!-- @COMPONENT: InspectorCard [Individual inspector card] -->
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6">
+                    <div class="flex items-start space-x-4 mb-4">
+                        <!-- Professional headshot of a male home inspector in business attire -->
+                        <img 
+                            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150" 
+                            alt="Inspector Profile Photo" 
+                            class="w-16 h-16 rounded-full object-cover"
+                            data-bind="inspector.photoUrl"
+                            data-mock-image="true"
+                        />
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-secondary" data-bind="inspector.name" data-mock="true">
+                                Michael Rodriguez
+                            </h3>
+                            <p class="text-sm text-muted" data-bind="inspector.licenseNumber" data-mock="true">
+                                License #HI-2024-001
+                            </p>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-400">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="ml-2 text-sm text-muted" data-bind="inspector.rating" data-mock="true">
+                                    4.9 (47 reviews)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-briefcase w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.experienceYears" data-mock="true">12 years experience</span>
+                        </div>
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-map-marker-alt w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.serviceAreas.join(', ')" data-mock="true">Irvine, Orange, Tustin</span>
+                        </div>
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-dollar-sign w-4 text-center mr-2"></i>
+                            <span>Starting at </span>
+                            <span class="font-semibold text-secondary ml-1" data-bind="inspector.basePrice" data-mock="true">$450</span>
+                        </div>
+                        <div class="flex items-center text-sm text-accent">
+                            <i class="fas fa-calendar w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.nextAvailability" data-mock="true">Available tomorrow</span>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                        data-event="click:viewInspectorProfile"
+                        data-implementation="Should navigate to /inspectors/:id route"
+                    >
+                        View Profile
+                    </button>
+                </div>
+                <!-- @END_COMPONENT: InspectorCard -->
+                
+                <!-- @COMPONENT: InspectorCard [Individual inspector card] -->
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6">
+                    <div class="flex items-start space-x-4 mb-4">
+                        <!-- Professional headshot of a female home inspector in business attire -->
+                        <img 
+                            src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150" 
+                            alt="Inspector Profile Photo" 
+                            class="w-16 h-16 rounded-full object-cover"
+                            data-bind="inspector.photoUrl"
+                            data-mock-image="true"
+                        />
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-secondary" data-bind="inspector.name" data-mock="true">
+                                Sarah Chen
+                            </h3>
+                            <p class="text-sm text-muted" data-bind="inspector.licenseNumber" data-mock="true">
+                                License #HI-2024-002
+                            </p>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-400">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="ml-2 text-sm text-muted" data-bind="inspector.rating" data-mock="true">
+                                    5.0 (32 reviews)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-briefcase w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.experienceYears" data-mock="true">8 years experience</span>
+                        </div>
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-map-marker-alt w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.serviceAreas.join(', ')" data-mock="true">Irvine, Newport Beach, Costa Mesa</span>
+                        </div>
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-dollar-sign w-4 text-center mr-2"></i>
+                            <span>Starting at </span>
+                            <span class="font-semibold text-secondary ml-1" data-bind="inspector.basePrice" data-mock="true">$425</span>
+                        </div>
+                        <div class="flex items-center text-sm text-accent">
+                            <i class="fas fa-calendar w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.nextAvailability" data-mock="true">Available Friday</span>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                        data-event="click:viewInspectorProfile"
+                        data-implementation="Should navigate to /inspectors/:id route"
+                    >
+                        View Profile
+                    </button>
+                </div>
+                <!-- @END_COMPONENT: InspectorCard -->
+                
+                <!-- @COMPONENT: InspectorCard [Individual inspector card] -->
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6">
+                    <div class="flex items-start space-x-4 mb-4">
+                        <!-- Professional headshot of a mature home inspector with experience -->
+                        <img 
+                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150" 
+                            alt="Inspector Profile Photo" 
+                            class="w-16 h-16 rounded-full object-cover"
+                            data-bind="inspector.photoUrl"
+                            data-mock-image="true"
+                        />
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-secondary" data-bind="inspector.name" data-mock="true">
+                                David Thompson
+                            </h3>
+                            <p class="text-sm text-muted" data-bind="inspector.licenseNumber" data-mock="true">
+                                License #HI-2024-003
+                            </p>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-400">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="ml-2 text-sm text-muted" data-bind="inspector.rating" data-mock="true">
+                                    4.7 (89 reviews)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-briefcase w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.experienceYears" data-mock="true">15 years experience</span>
+                        </div>
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-map-marker-alt w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.serviceAreas.join(', ')" data-mock="true">Irvine, Anaheim, Santa Ana</span>
+                        </div>
+                        <div class="flex items-center text-sm text-muted">
+                            <i class="fas fa-dollar-sign w-4 text-center mr-2"></i>
+                            <span>Starting at </span>
+                            <span class="font-semibold text-secondary ml-1" data-bind="inspector.basePrice" data-mock="true">$475</span>
+                        </div>
+                        <div class="flex items-center text-sm text-orange-500">
+                            <i class="fas fa-calendar w-4 text-center mr-2"></i>
+                            <span data-bind="inspector.nextAvailability" data-mock="true">Available next week</span>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                        data-event="click:viewInspectorProfile"
+                        data-implementation="Should navigate to /inspectors/:id route"
+                    >
+                        View Profile
+                    </button>
+                </div>
+                <!-- @END_COMPONENT: InspectorCard -->
+                
+                <!-- @END_MAP )) -->
+            </div>
+            <!-- @END_COMPONENT: InspectorsList -->
+        </div>
+    </div>
+    <!-- @END_COMPONENT: InspectorsDirectory -->
+
+    <!-- @COMPONENT: InspectorProfile [Inspector profile route component] -->
+    <div id="inspector-profile" class="min-h-screen bg-gray-50" style="display: none;">
+        <!-- @COMPONENT: Header [Navigation header] -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <h1 class="text-2xl font-bold text-primary">
+                                <i class="fas fa-search-location mr-2"></i>
+                                InspectNow
+                            </h1>
+                        </div>
+                    </div>
+                    <nav class="flex space-x-8">
+                        <a href="#" class="text-secondary hover:text-primary font-medium transition-colors" data-event="click:navigateToInspectors">
+                            Back to Inspectors
+                        </a>
+                        <a href="#" class="text-secondary hover:text-primary font-medium transition-colors" data-event="click:navigateToHome">
+                            Home
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- @COMPONENT: InspectorDetails [Main profile content] -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- @COMPONENT: ProfileHeader [Inspector header info] -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+                            <!-- Professional headshot of a male home inspector in business attire -->
+                            <img 
+                                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200" 
+                                alt="Michael Rodriguez Profile Photo" 
+                                class="w-24 h-24 rounded-full object-cover"
+                                data-bind="inspector.photoUrl"
+                                data-mock-image="true"
+                            />
+                            <div class="flex-1">
+                                <h1 class="text-3xl font-bold text-secondary mb-2" data-bind="inspector.name" data-mock="true">
+                                    Michael Rodriguez
+                                </h1>
+                                <p class="text-muted mb-2" data-bind="inspector.licenseNumber" data-mock="true">
+                                    License #HI-2024-001
+                                </p>
+                                <div class="flex items-center mb-3">
+                                    <div class="flex text-yellow-400 mr-2">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="text-secondary font-medium" data-bind="inspector.rating" data-mock="true">
+                                        4.9
+                                    </span>
+                                    <span class="text-muted ml-1" data-mock="true">(47 reviews)</span>
+                                </div>
+                                <div class="flex flex-wrap gap-4 text-sm">
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-briefcase mr-1"></i>
+                                        <span data-bind="inspector.experienceYears" data-mock="true">12 years</span>
+                                    </div>
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-certificate mr-1"></i>
+                                        <span data-bind="inspector.certification" data-mock="true">ASHI Certified</span>
+                                    </div>
+                                    <div class="flex items-center text-accent">
+                                        <i class="fas fa-shield-alt mr-1"></i>
+                                        <span>Insured & Bonded</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: ProfileHeader -->
+
+                    <!-- @COMPONENT: InspectorBio [Bio and specialties] -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-semibold text-secondary mb-4">About</h2>
+                        <p class="text-muted mb-6" data-bind="inspector.bio" data-mock="true">
+                            With over 12 years of experience in home inspections, I provide thorough, detailed reports to help you make informed decisions about your property purchase. I specialize in both residential and commercial properties, with expertise in newer construction and older homes requiring renovation assessments.
+                        </p>
+                        
+                        <h3 class="text-lg font-semibold text-secondary mb-3">Service Areas</h3>
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <!-- @MAP: inspector.serviceAreas.map(area => ( -->
+                            <span class="bg-gray-100 text-secondary px-3 py-1 rounded-full text-sm" data-mock="true">Irvine</span>
+                            <span class="bg-gray-100 text-secondary px-3 py-1 rounded-full text-sm" data-mock="true">Orange</span>
+                            <span class="bg-gray-100 text-secondary px-3 py-1 rounded-full text-sm" data-mock="true">Tustin</span>
+                            <span class="bg-gray-100 text-secondary px-3 py-1 rounded-full text-sm" data-mock="true">Santa Ana</span>
+                            <!-- @END_MAP )) -->
+                        </div>
+                        
+                        <h3 class="text-lg font-semibold text-secondary mb-3">Specialties</h3>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <!-- @MAP: inspector.specialties.map(specialty => ( -->
+                            <div class="flex items-center text-muted" data-mock="true">
+                                <i class="fas fa-check-circle text-accent mr-2"></i>
+                                Structural Assessments
+                            </div>
+                            <div class="flex items-center text-muted" data-mock="true">
+                                <i class="fas fa-check-circle text-accent mr-2"></i>
+                                HVAC Systems
+                            </div>
+                            <div class="flex items-center text-muted" data-mock="true">
+                                <i class="fas fa-check-circle text-accent mr-2"></i>
+                                Electrical Systems
+                            </div>
+                            <div class="flex items-center text-muted" data-mock="true">
+                                <i class="fas fa-check-circle text-accent mr-2"></i>
+                                Plumbing Inspection
+                            </div>
+                            <div class="flex items-center text-muted" data-mock="true">
+                                <i class="fas fa-check-circle text-accent mr-2"></i>
+                                Roof & Exterior
+                            </div>
+                            <div class="flex items-center text-muted" data-mock="true">
+                                <i class="fas fa-check-circle text-accent mr-2"></i>
+                                Foundation Analysis
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: InspectorBio -->
+
+                    <!-- @COMPONENT: AvailabilityCalendar [Availability display] -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-semibold text-secondary mb-6">Upcoming Availability</h2>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <!-- @MAP: inspector.availability.map(slot => ( -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="font-semibold text-secondary">Tomorrow</div>
+                                        <div class="text-sm text-muted">Dec 15, 2024</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-accent font-medium">Available</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-muted">
+                                    Morning: 9:00 AM - 12:00 PM<br>
+                                    Afternoon: 1:00 PM - 4:00 PM
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="font-semibold text-secondary">Friday</div>
+                                        <div class="text-sm text-muted">Dec 16, 2024</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-accent font-medium">Available</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-muted">
+                                    Morning: 8:00 AM - 11:00 AM<br>
+                                    Afternoon: 2:00 PM - 5:00 PM
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 opacity-60" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="font-semibold text-secondary">Saturday</div>
+                                        <div class="text-sm text-muted">Dec 17, 2024</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-red-500 font-medium">Booked</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-muted">
+                                    No availability
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <div class="font-semibold text-secondary">Monday</div>
+                                        <div class="text-sm text-muted">Dec 19, 2024</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-accent font-medium">Available</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-muted">
+                                    All day: 8:00 AM - 6:00 PM
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: AvailabilityCalendar -->
+                </div>
+                <!-- @END_COMPONENT: InspectorDetails -->
+
+                <!-- @COMPONENT: BookingSidebar [Booking and contact sidebar] -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-8 space-y-6">
+                        <!-- @COMPONENT: PricingCard [Pricing information] -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="text-center mb-6">
+                                <div class="text-3xl font-bold text-secondary mb-2">
+                                    <span data-bind="inspector.basePrice" data-mock="true">$450</span>
+                                </div>
+                                <p class="text-muted">Starting price for standard home inspection</p>
+                            </div>
+                            
+                            <div class="space-y-3 mb-6 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-muted">Standard Home (up to 2,500 sq ft)</span>
+                                    <span class="text-secondary font-medium" data-mock="true">$450</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">Large Home (2,500+ sq ft)</span>
+                                    <span class="text-secondary font-medium" data-mock="true">$575</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">Condo/Townhouse</span>
+                                    <span class="text-secondary font-medium" data-mock="true">$375</span>
+                                </div>
+                                <hr class="my-3">
+                                <div class="flex justify-between">
+                                    <span class="text-muted">Additional services available</span>
+                                    <span class="text-accent text-xs">View details</span>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                class="w-full bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg cursor-not-allowed mb-3"
+                                disabled
+                                data-implementation="Demo button - should be enabled for real booking"
+                            >
+                                <i class="fas fa-lock mr-2"></i>
+                                Request Booking (Demo)
+                            </button>
+                            <p class="text-xs text-muted text-center">
+                                This is a demo. Booking functionality would be implemented here.
+                            </p>
+                        </div>
+                        <!-- @END_COMPONENT: PricingCard -->
+
+                        <!-- @COMPONENT: ContactCard [Contact information] -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-lg font-semibold text-secondary mb-4">Contact Information</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-muted">Email</div>
+                                        <div class="text-secondary font-medium" data-bind="inspector.contact.email" data-mock="true">
+                                            michael@inspectnow.com
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-phone"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-muted">Phone</div>
+                                        <div class="text-secondary font-medium" data-bind="inspector.contact.phone" data-mock="true">
+                                            (714) 555-0123
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                <div class="text-xs text-muted">
+                                    <p class="mb-2">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Response time: Usually within 2 hours
+                                    </p>
+                                    <p>
+                                        <i class="fas fa-shield-alt mr-1"></i>
+                                        Licensed, insured, and bonded
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: ContactCard -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: BookingSidebar -->
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: InspectorProfile -->
+</div>
+<!-- @END_COMPONENT: App -->
+
+<!-- @STATE: currentPage:string = 'landing' -->
+<!-- @STATE: selectedInspector:object = null -->
+<!-- @STATE: inspectors:array = [] -->
+
+<script>
+(function() {
+    // TODO: Implement React Router for actual navigation
+    // TODO: Load inspector data from src/inspectors.json file
+    // TODO: Implement form submission for search functionality
+    // TODO: Implement inspector profile navigation with dynamic routes
+    
+    // Demo navigation functionality
+    const pages = {
+        landing: document.getElementById('landing-page'),
+        inspectors: document.getElementById('inspectors-page'),
+        profile: document.getElementById('inspector-profile')
+    };
+    
+    let currentPage = 'landing';
+    
+    function showPage(pageId) {
+        // Hide all pages
+        Object.values(pages).forEach(page => {
+            if (page) page.style.display = 'none';
+        });
+        
+        // Show selected page
+        if (pages[pageId]) {
+            pages[pageId].style.display = 'block';
+            currentPage = pageId;
+        }
+    }
+    
+    // Navigation event listeners
+    document.addEventListener('click', function(e) {
+        const target = e.target.closest('[data-event]');
+        if (!target) return;
+        
+        const eventType = target.getAttribute('data-event');
+        e.preventDefault();
+        
+        switch (eventType) {
+            case 'click:navigateToInspectors':
+            case 'submit:handleSearchSubmit':
+                showPage('inspectors');
+                break;
+            case 'click:navigateToHome':
+                showPage('landing');
+                break;
+            case 'click:viewInspectorProfile':
+                showPage('profile');
+                break;
+        }
+    });
+    
+    // Form submission handler
+    document.addEventListener('submit', function(e) {
+        const form = e.target.closest('form');
+        if (form) {
+            e.preventDefault();
+            // TODO: Handle form submission and navigation to inspectors
+            showPage('inspectors');
+        }
+    });
+    
+    // Sample inspector data structure for reference
+    const sampleInspectorsJSON = {
+        inspectors: [
+            {
+                id: "1",
+                name: "Michael Rodriguez",
+                licenseNumber: "HI-2024-001",
+                serviceAreas: ["Irvine", "Orange", "Tustin", "Santa Ana"],
+                basePrice: "$450",
+                experienceYears: 12,
+                rating: 4.9,
+                reviewCount: 47,
+                bio: "With over 12 years of experience in home inspections, I provide thorough, detailed reports to help you make informed decisions about your property purchase.",
+                specialties: ["Structural Assessments", "HVAC Systems", "Electrical Systems", "Plumbing Inspection", "Roof & Exterior", "Foundation Analysis"],
+                certification: "ASHI Certified",
+                availability: [
+                    {
+                        date: "2024-12-15",
+                        slots: ["9:00 AM - 12:00 PM", "1:00 PM - 4:00 PM"],
+                        status: "available"
+                    }
+                ],
+                contact: {
+                    email: "michael@inspectnow.com",
+                    phone: "(714) 555-0123"
+                },
+                photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
+            }
+        ]
+    };
+    
+    // Initialize with landing page
+    showPage('landing');
+    
+    console.log('InspectNow Demo Initialized');
+    console.log('Sample JSON structure:', sampleInspectorsJSON);
+})();
+</script>
+
+</body>
+</html>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { InterestButton } from '@/components/InterestButton';
 import { Request } from '@/store/localStore';
-import { Calendar, MapPin, Home, DollarSign, Clock } from 'lucide-react';
+import { Calendar, Home, DollarSign } from 'lucide-react';
 
 interface RequestCardProps {
   request: Request;
@@ -24,9 +24,8 @@ function isNew(createdAt: string): boolean {
 }
 
 export function RequestCard({ request }: RequestCardProps) {
-  const truncateNotes = (notes: string, maxLength: number = 100) => {
-    return notes.length > maxLength ? `${notes.substring(0, maxLength)}...` : notes;
-  };
+  const truncateNotes = (notes: string, maxLength: number = 100) =>
+    notes.length > maxLength ? `${notes.substring(0, maxLength)}...` : notes;
 
   return (
     <Card className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow" data-testid={`card-request-${request.id}`}>
@@ -42,10 +41,10 @@ export function RequestCard({ request }: RequestCardProps) {
                   New
                 </Badge>
               )}
-              <Badge 
+              <Badge
                 className={`text-xs ${
-                  request.type === 'client_request' 
-                    ? 'bg-blue-100 text-blue-800' 
+                  request.type === 'client_request'
+                    ? 'bg-blue-100 text-blue-800'
                     : 'bg-purple-100 text-purple-800'
                 }`}
                 data-testid={`badge-request-type-${request.id}`}
@@ -71,14 +70,15 @@ export function RequestCard({ request }: RequestCardProps) {
           <div className="flex items-center text-sm text-muted">
             <Calendar className="w-4 h-4 mr-2" />
             <span data-testid={`text-request-date-${request.id}`}>
-              Preferred: {new Date(request.schedule.preferredDate).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric' 
+              Preferred:{' '}
+              {new Date(request.schedule.preferredDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
               })}
             </span>
           </div>
-          
+
           <div className="flex items-center text-sm text-muted">
             <Home className="w-4 h-4 mr-2" />
             <span data-testid={`text-request-property-${request.id}`}>
@@ -90,9 +90,7 @@ export function RequestCard({ request }: RequestCardProps) {
           {request.notes && (
             <div className="text-sm text-muted">
               <span className="font-medium">Notes: </span>
-              <span data-testid={`text-request-notes-${request.id}`}>
-                {truncateNotes(request.notes)}
-              </span>
+              <span data-testid={`text-request-notes-${request.id}`}>{truncateNotes(request.notes)}</span>
             </div>
           )}
         </div>
@@ -105,12 +103,9 @@ export function RequestCard({ request }: RequestCardProps) {
               </Button>
             </Link>
           </div>
-          
-          <InterestButton 
-            key={`interest-${request.id}-${request.interestCount}`}
-            requestId={request.id} 
-            interestCount={request.interestCount}
-          />
+
+          {/* Interest button stays in sync via store */}
+          <InterestButton requestId={request.id} interestCount={request.interestCount} />
         </div>
       </CardContent>
     </Card>
