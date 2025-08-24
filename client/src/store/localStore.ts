@@ -440,13 +440,6 @@ export function useLocalStore() {
       (req.type === 'open_request' || req.type === 'client_request')
     );
     
-    // Debug: Log what we're finding
-    console.log('getClientRequests debug:', {
-      clientEmail,
-      allRequests: store.requests.length,
-      filteredRequests: clientRequests.length,
-      requestTypes: store.requests.map(r => ({ id: r.id, type: r.type, clientEmail: r.client.email }))
-    });
     
     return clientRequests;
   };
