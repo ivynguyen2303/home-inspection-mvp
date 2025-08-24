@@ -36,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { updateInspectorProfile } = useLocalStore();
+  const { updateInspectorProfile, addInspectorProfile } = useLocalStore();
 
   // Initialize session on mount
   useEffect(() => {
@@ -160,18 +160,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           insurance: '$1M Professional Liability'
         };
         updateInspectorProfile(inspectorProfile);
-        // Also add to the public directory
-        try {
-          const storeData = localStorage.getItem('inspect_now_store');
-          if (storeData) {
-            const store = JSON.parse(storeData);
-            store.allInspectorProfiles = store.allInspectorProfiles || [];
-            store.allInspectorProfiles = [...store.allInspectorProfiles.filter((p: any) => p.id !== inspectorProfile.id), inspectorProfile];
-            localStorage.setItem('inspect_now_store', JSON.stringify(store));
-          }
-        } catch (error) {
-          console.error('Error adding inspector profile:', error);
-        }
+        
+        // Also add to the public directory using the store function
+        addInspectorProfile(inspectorProfile);
       }
 
       // Create session
