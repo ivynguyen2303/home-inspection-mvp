@@ -1,44 +1,49 @@
-import React, { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Heart } from 'lucide-react';
 import { useLocalStore } from '@/store/localStore';
 
-interface Props {
+interface InterestButtonProps {
   requestId: string;
-  /** optional: lets you pass the current count so parent re-renders don’t hide changes */
-  interestCount?: number;
+  interestCount: number;
+  className?: string;
 }
 
-export function InterestButton({ requestId }: Props) {
-  const { inspectorProfile, requests, toggleInterest } = useLocalStore();
+export function InterestButton({ requestId, interestCount, className }: InterestButtonProps) {
+  const { inspectorProfile, toggleInterest, requests } = useLocalStore();
+  
+  const request = requests.find(r => r.id === requestId);
+  const isInterested = request?.interestedInspectorEmails?.includes(inspectorProfile.email) || false;
+  
+  // Use the actual interestCount from the store to ensure it's always current
+  const currentInterestCount = request?.interestCount || interestCount;
 
-  const { isInterested, count, disabled } = useMemo(() => {
-    const r = requests.find(x => x.id === requestId);
-    if (!r) return { isInterested: false, count: 0, disabled: true };
-    const email = inspectorProfile?.email ?? '';
-    const interested = r.interestedInspectorEmails.includes(email);
-    return {
-      isInterested: interested,
-      count: r.interestCount ?? r.interestedInspectorEmails.length,
-      disabled: !email
-    };
-  }, [inspectorProfile?.email, requestId, requests]);
-
-  const onClick = () => {
-    if (disabled) return;
+  const handleToggle = () => {
     toggleInterest(requestId, inspectorProfile.email);
   };
 
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`inline-flex items-center gap-2 rounded-xl px-3 py-1 border 
-                  ${isInterested ? 'bg-rose-100 border-rose-300' : 'bg-white border-gray-300'}`}
-      title={disabled ? 'Sign in as an inspector to express interest' : (isInterested ? 'Remove interest' : "I'm interested")}
-      data-testid={`interest-button-${requestId}`}
-    >
-      <span aria-hidden>{isInterested ? '❤️' : '🤍'}</span>
-      <span className="text-sm">{isInterested ? 'Interested' : "I'm Interested"}</span>
-      <span className="text-xs opacity-70">({count})</span>
-    </button>
+    <div className={`flex items-center space-x-2 ${className}`}>
+      <Button
+        onClick={handleToggle}
+        variant={isInterested ? "default" : "outline"}
+        size="sm"
+        className={`flex items-center space-x-1 ${
+          isInterested 
+            ? 'bg-red-500 hover:bg-red-600 text-white border-red-500' 
+            : 'border-red-200 text-red-600 hover:bg-red-50'
+        }`}
+        data-testid={`button-interest-${requestId}`}
+      >
+        <Heart className={`w-4 h-4 ${isInterested ? 'fill-current' : ''}`} />
+        <span>{isInterested ? 'Interested' : 'I\'m Interested'}</span>
+      </Button>
+      {currentInterestCount > 0 && (
+        <Badge variant="secondary" className="bg-red-100 text-red-800 flex items-center gap-1 whitespace-nowrap" data-testid={`badge-interest-count-${requestId}`}>
+          <span>{currentInterestCount}</span>
+          <span>❤</span>
+        </Badge>
+      )}
+    </div>
   );
 }

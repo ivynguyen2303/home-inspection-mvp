@@ -6,8 +6,12 @@ export interface Request {
   createdAt: string;
   status: 'open' | 'matched' | 'closed';
   type: 'client_request' | 'open_request';
-  targetInspectorEmail?: string;
-  client: { name: string; email: string; phone: string };
+  targetInspectorEmail?: string; // Only for client_request type
+  client: {
+    name: string;
+    email: string;
+    phone: string;
+  };
   property: {
     address: string;
     cityZip: string;
@@ -16,7 +20,10 @@ export interface Request {
     baths: number;
     sqft?: number;
   };
-  schedule: { preferredDate: string; altDate?: string };
+  schedule: {
+    preferredDate: string;
+    altDate?: string;
+  };
   budget?: number;
   notes: string;
   interestCount: number;
@@ -24,7 +31,7 @@ export interface Request {
 }
 
 export interface InspectorProfile {
-  email: string;
+  email: string; // Primary identifier
   displayName: string;
   serviceAreas: string[];
   specialties: string[];
@@ -50,7 +57,11 @@ export interface InspectorProfile {
       available: boolean;
     }>;
   };
-  contact?: { phone: string; email: string; website?: string };
+  contact?: {
+    phone: string;
+    email: string;
+    website?: string;
+  };
   insurance?: string;
 }
 
@@ -69,112 +80,79 @@ const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
 };
 
 const STORAGE_KEY = 'inspect_now_store';
-const SHARED_REQUESTS_KEY = 'inspect_now_shared_requests';
-const SHARED_PROFILES_KEY = 'inspect_now_shared_profiles';
+const SHARED_REQUESTS_KEY = 'inspect_now_shared_requests'; // Shared across all users
+const SHARED_PROFILES_KEY = 'inspect_now_shared_profiles'; // Shared across all users
 
+// Helper function to get user-specific storage key for profiles only
 function getUserStorageKey(userEmail?: string): string {
   if (!userEmail) return STORAGE_KEY;
   return `${STORAGE_KEY}_${userEmail}`;
 }
 
-const broadcast = () => {
-  try { setTimeout(() => window.dispatchEvent(new Event('storage')), 10); } catch {}
-};
-
-function safeParse<T>(raw: string | null, fallback: T): T {
-  if (!raw) return fallback;
-  try { return JSON.parse(raw) as T; } catch { return fallback; }
-}
-
-function normalizeRequest(raw: any): Request {
-  const type: Request['type'] =
-    raw?.type === 'client_request' || raw?.type === 'open_request' ? raw.type : 'open_request';
-  const status: Request['status'] =
-    raw?.status === 'open' || raw?.status === 'matched' || raw?.status === 'closed' ? raw.status : 'open';
-  const propType: Request['property']['type'] =
-    raw?.property?.type === 'House' || raw?.property?.type === 'Townhome' || raw?.property?.type === 'Condo'
-      ? raw.property.type
-      : 'House';
-  const emails: string[] = Array.isArray(raw?.interestedInspectorEmails)
-    ? raw.interestedInspectorEmails.map(String)
-    : [];
-
-  return {
-    id: String(raw?.id ?? `req_${Date.now()}`),
-    createdAt: String(raw?.createdAt ?? new Date().toISOString()),
-    status,
-    type,
-    targetInspectorEmail: raw?.targetInspectorEmail ? String(raw.targetInspectorEmail) : undefined,
-    client: {
-      name: String(raw?.client?.name ?? 'Client'),
-      email: String(raw?.client?.email ?? ''),
-      phone: String(raw?.client?.phone ?? '')
-    },
-    property: {
-      address: String(raw?.property?.address ?? ''),
-      cityZip: String(raw?.property?.cityZip ?? ''),
-      type: propType,
-      beds: Number(raw?.property?.beds ?? 0),
-      baths: Number(raw?.property?.baths ?? 0),
-      sqft: raw?.property?.sqft != null ? Number(raw.property.sqft) : undefined
-    },
-    schedule: {
-      preferredDate: String(raw?.schedule?.preferredDate ?? new Date().toISOString()),
-      altDate: raw?.schedule?.altDate != null ? String(raw.schedule.altDate) : undefined
-    },
-    budget: raw?.budget != null ? Number(raw.budget) : undefined,
-    notes: String(raw?.notes ?? ''),
-    interestCount: Number.isFinite(raw?.interestCount) ? Number(raw.interestCount) : emails.length,
-    interestedInspectorEmails: emails
-  };
-}
-
-function getCurrentUserEmail(): string | undefined {
-  try {
-    const session = getSession();
-    if (session) {
-      const user = findUserById(session.userId);
-      return user?.email;
-    }
-  } catch (error) {
-    console.error('Error getting current user:', error);
-  }
-  return undefined;
-}
-
 export function useLocalStore() {
+  // Get current user email from session
+  const getCurrentUserEmail = () => {
+    try {
+      const session = getSession();
+      if (session) {
+        const user = findUserById(session.userId);
+        return user?.email;
+      }
+    } catch (error) {
+      console.error('Error getting current user:', error);
+    }
+    return undefined;
+  };
+
   const [store, setStore] = useState<LocalStore>(() => {
     const userEmail = getCurrentUserEmail();
     const userStorageKey = getUserStorageKey(userEmail);
-
-    let sharedRequests: Request[] = [];
+    
+    
+    // Load shared requests (accessible to all users)
+    let sharedRequests = [];
     try {
       const savedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      
       if (savedRequests) {
-        sharedRequests = safeParse<any[]>(savedRequests, []).map(normalizeRequest);
-        // Write back normalized to ensure consistency
-        localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(sharedRequests));
+        const parsed = JSON.parse(savedRequests);
+        
+        // Only clear if we actually find the old problematic fields
+        const hasOldFormat = Array.isArray(parsed) && parsed.some((r: any) => 
+          r.hasOwnProperty('interestedInspectorIds') || r.hasOwnProperty('targetInspectorId')
+        );
+        
+        if (hasOldFormat) {
+          localStorage.removeItem(SHARED_REQUESTS_KEY);
+          sharedRequests = [];
+        } else {
+          sharedRequests = Array.isArray(parsed) ? parsed : [];
+        }
       }
     } catch (error) {
       console.error('Error loading shared requests:', error);
     }
-
-    let sharedProfiles: InspectorProfile[] = [];
+    
+    // Load shared inspector profiles (accessible to all users)
+    let sharedProfiles = [];
     try {
       const savedProfiles = localStorage.getItem(SHARED_PROFILES_KEY);
       if (savedProfiles) {
-        const parsed = safeParse<InspectorProfile[]>(savedProfiles, []);
+        const parsed = JSON.parse(savedProfiles);
         sharedProfiles = Array.isArray(parsed) ? parsed : [];
       }
     } catch (error) {
       console.error('Error loading shared profiles:', error);
     }
-
+    
+    // Load user-specific inspector profile (only current user's own profile)
     let userInspectorProfile = DEFAULT_INSPECTOR_PROFILE;
     try {
       const savedUserData = localStorage.getItem(userStorageKey);
+      
       if (savedUserData) {
-        const parsed = safeParse<any>(savedUserData, {});
+        const parsed = JSON.parse(savedUserData);
+        
         if (parsed.inspectorProfile) {
           userInspectorProfile = parsed.inspectorProfile;
         }
@@ -182,7 +160,7 @@ export function useLocalStore() {
     } catch (error) {
       console.error('Error loading user data:', error);
     }
-
+    
     return {
       requests: sharedRequests,
       inspectorProfile: userInspectorProfile,
@@ -190,191 +168,307 @@ export function useLocalStore() {
     };
   });
 
-  /** Cross-tab/account sync: hydrate on storage events */
-  useEffect(() => {
-    const onStorage = () => {
+  // Debug function to inspect localStorage
+  const debugLocalStorage = () => {
+    console.log('🔍 [DEBUG STORAGE] === LocalStorage Debug ===');
+    console.log('🔍 [DEBUG STORAGE] All localStorage keys:', Object.keys(localStorage));
+    console.log('🔍 [DEBUG STORAGE] SHARED_REQUESTS_KEY:', SHARED_REQUESTS_KEY);
+    
+    const sharedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+    console.log('🔍 [DEBUG STORAGE] Shared requests raw:', sharedRequests);
+    if (sharedRequests) {
       try {
-        const sharedRequests = safeParse<any[]>(
-          localStorage.getItem(SHARED_REQUESTS_KEY),
-          []
-        ).map(normalizeRequest);
-        const sharedProfiles = safeParse<InspectorProfile[]>(
-          localStorage.getItem(SHARED_PROFILES_KEY),
-          []
-        );
-
-        const nextReqJson = JSON.stringify(sharedRequests);
-        const curReqJson = JSON.stringify(store.requests);
-        const nextProfJson = JSON.stringify(sharedProfiles);
-        const curProfJson = JSON.stringify(store.allInspectorProfiles);
-
-        if (nextReqJson !== curReqJson || nextProfJson !== curProfJson) {
-          setStore(prev => ({
-            ...prev,
-            requests: nextReqJson !== curReqJson ? sharedRequests : prev.requests,
-            allInspectorProfiles: nextProfJson !== curProfJson ? sharedProfiles : prev.allInspectorProfiles
-          }));
-        }
+        const parsed = JSON.parse(sharedRequests);
+        console.log('🔍 [DEBUG STORAGE] Shared requests parsed:', parsed);
+        console.log('🔍 [DEBUG STORAGE] Shared requests count:', parsed.length);
       } catch (e) {
-        console.error('Failed to sync from storage event', e);
+        console.log('🔍 [DEBUG STORAGE] Error parsing shared requests:', e);
       }
-    };
+    }
+    
+    const userEmail = getCurrentUserEmail();
+    const userStorageKey = getUserStorageKey(userEmail);
+    console.log('🔍 [DEBUG STORAGE] User storage key:', userStorageKey);
+    
+    const userData = localStorage.getItem(userStorageKey);
+    console.log('🔍 [DEBUG STORAGE] User data raw:', userData);
+    
+    console.log('🔍 [DEBUG STORAGE] Current store state:', store);
+    console.log('🔍 [DEBUG STORAGE] === End Debug ===');
+  };
 
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.requests, store.allInspectorProfiles]);
+  // Clear all data function
+  const clearAllData = () => {
+    const userEmail = getCurrentUserEmail();
+    const userStorageKey = getUserStorageKey(userEmail);
+    // Clear shared requests and user-specific data
+    localStorage.removeItem(SHARED_REQUESTS_KEY);
+    localStorage.removeItem(userStorageKey);
+    // Clear user accounts and sessions 
+    localStorage.removeItem('inspect_now_users');
+    localStorage.removeItem('inspect_now_session');
+    
+    setStore({
+      requests: [],
+      inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
+      allInspectorProfiles: []
+    });
+  };
 
-  /**
-   * Persist ONLY the per-user blob in the generic effect.
-   * DO NOT write SHARED_REQUESTS_KEY or SHARED_PROFILES_KEY here.
-   * Those are written exactly at mutation sites below to avoid “nuking” shared data.
-   */
+  // Save to localStorage whenever store changes
   useEffect(() => {
     const userEmail = getCurrentUserEmail();
     const userStorageKey = getUserStorageKey(userEmail);
+    
     try {
-      localStorage.setItem(userStorageKey, JSON.stringify({ inspectorProfile: store.inspectorProfile }));
-      broadcast();
+      // Save shared requests (accessible to all users)
+      const requestsJson = JSON.stringify(store.requests);
+      localStorage.setItem(SHARED_REQUESTS_KEY, requestsJson);
+      
+      // Save shared inspector profiles (accessible to all users)
+      const profilesJson = JSON.stringify(store.allInspectorProfiles);
+      localStorage.setItem(SHARED_PROFILES_KEY, profilesJson);
+      
+      // Save user-specific data (only current user's own profile)
+      const userData = {
+        inspectorProfile: store.inspectorProfile
+      };
+      const userDataJson = JSON.stringify(userData);
+      localStorage.setItem(userStorageKey, userDataJson);
     } catch (error) {
-      console.error('Error saving per-user data to localStorage:', error);
+      console.error('Error saving to localStorage:', error);
     }
-  }, [store.inspectorProfile]);
+  }, [store]);
 
-  /* =========================
-   * Shared data mutations — write shared keys here ONLY
-   * ========================= */
-
-  const addRequest = (
-    requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorEmails'>
-  ) => {
+  const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorEmails'>) => {
     const newRequest: Request = {
       ...requestData,
-      id: (globalThis.crypto as any)?.randomUUID?.() ?? `req_${Date.now()}`,
+      id: `req_${Date.now()}`,
       createdAt: new Date().toISOString(),
       interestCount: 0,
       interestedInspectorEmails: []
     };
-
+    
     try {
-      const existing = safeParse<any[]>(localStorage.getItem(SHARED_REQUESTS_KEY), []).map(normalizeRequest);
-      const updatedRequests = [newRequest, ...existing];
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = [newRequest, ...existingRequests];
+      
       localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
-      setStore(prev => ({ ...prev, requests: updatedRequests }));
-      broadcast();
+      
+      // Update state
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
     } catch (error) {
       console.error('Error adding request:', error);
-      setStore(prev => ({ ...prev, requests: [newRequest, ...prev.requests] }));
-      broadcast();
+      // Fallback to regular state update if localStorage fails
+      setStore(prev => ({
+        ...prev,
+        requests: [newRequest, ...prev.requests]
+      }));
     }
-
+    
     return newRequest.id;
   };
 
   const toggleInterest = (requestId: string, inspectorEmail: string) => {
-    if (!inspectorEmail) return;
+    console.log('toggleInterest called for:', { requestId, inspectorEmail });
+    
+    // Direct localStorage manipulation to ensure persistence
     try {
-      const current = safeParse<any[]>(localStorage.getItem(SHARED_REQUESTS_KEY), []).map(normalizeRequest);
-      const updatedRequests: Request[] = current.map(req => {
-        if (req.id !== requestId) return req;
-        const set = new Set(req.interestedInspectorEmails);
-        if (set.has(inspectorEmail)) set.delete(inspectorEmail); else set.add(inspectorEmail);
-        const emails = Array.from(set);
-        return { ...req, interestedInspectorEmails: emails, interestCount: emails.length };
+      const currentData = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const parsed = currentData ? JSON.parse(currentData) : [];
+      
+      const updatedRequests = parsed.map((req: Request) => {
+        if (req.id === requestId) {
+          const isInterested = req.interestedInspectorEmails.includes(inspectorEmail);
+          const interestedInspectorEmails = isInterested
+            ? req.interestedInspectorEmails.filter((email: string) => email !== inspectorEmail)
+            : [...req.interestedInspectorEmails, inspectorEmail];
+          
+          const updatedRequest = {
+            ...req,
+            interestedInspectorEmails,
+            interestCount: interestedInspectorEmails.length
+          };
+          
+          console.log('toggleInterest - Updated request:', {
+            id: requestId,
+            wasInterested: isInterested,
+            nowInterested: !isInterested,
+            newCount: interestedInspectorEmails.length,
+            interestedInspectorEmails
+          });
+          
+          return updatedRequest;
+        }
+        return req;
       });
+      
       localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
-      setStore(prev => ({ ...prev, requests: updatedRequests }));
-      broadcast();
+      console.log('toggleInterest - Direct localStorage save successful');
+      
+      // Force React to re-read from localStorage
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
+      console.log('toggleInterest - Forced store update');
+      
     } catch (error) {
-      console.error('toggleInterest failed:', error);
+      console.error('toggleInterest - localStorage backup failed:', error);
     }
   };
+
 
   const updateInspectorProfile = (updates: Partial<InspectorProfile>) => {
     setStore(prev => {
       const updatedProfile = { ...prev.inspectorProfile, ...updates };
-      const updatedAllProfiles = prev.allInspectorProfiles.map(profile =>
+      // Also update in the all profiles list
+      const updatedAllProfiles = prev.allInspectorProfiles.map(profile => 
         profile.email === updatedProfile.email ? updatedProfile : profile
       );
-
-      // Persist shared profiles here (not in the generic effect)
-      try {
-        localStorage.setItem(SHARED_PROFILES_KEY, JSON.stringify(updatedAllProfiles));
-        broadcast();
-      } catch (e) {
-        console.error('Error saving shared profiles:', e);
-      }
-
-      return { ...prev, inspectorProfile: updatedProfile, allInspectorProfiles: updatedAllProfiles };
+      
+      return {
+        ...prev,
+        inspectorProfile: updatedProfile,
+        allInspectorProfiles: updatedAllProfiles
+      };
     });
   };
 
+  // Set the current inspector profile by email (for login)
   const setCurrentInspectorProfile = (userEmail: string) => {
     const profile = getInspectorProfileByEmail(userEmail);
     if (profile) {
-      setStore(prev => ({ ...prev, inspectorProfile: profile }));
-      // per-user persist happens via the effect on inspectorProfile
+      setStore(prev => ({
+        ...prev,
+        inspectorProfile: profile
+      }));
     }
   };
 
   const addInspectorProfile = (profile: InspectorProfile) => {
-    setStore(prev => {
-      const nextAll = [...prev.allInspectorProfiles.filter(p => p.email !== profile.email), profile];
-      try {
-        localStorage.setItem(SHARED_PROFILES_KEY, JSON.stringify(nextAll));
-        broadcast();
-      } catch (e) {
-        console.error('Error saving shared profiles:', e);
-      }
-      return { ...prev, allInspectorProfiles: nextAll };
-    });
+    setStore(prev => ({
+      ...prev,
+      allInspectorProfiles: [...prev.allInspectorProfiles.filter(p => p.email !== profile.email), profile]
+    }));
+    
+    // Trigger a storage event to notify other components
+    setTimeout(() => {
+      window.dispatchEvent(new Event('storage'));
+    }, 100);
   };
 
-  const getAllInspectorProfiles = () => store.allInspectorProfiles;
-  const getInspectorProfileByEmail = (email: string) => store.allInspectorProfiles.find(p => p.email === email);
+  const getAllInspectorProfiles = () => {
+    return store.allInspectorProfiles;
+  };
 
+  const getInspectorProfileByEmail = (email: string) => {
+    return store.allInspectorProfiles.find(profile => profile.email === email);
+  };
+
+  // Remove inspector profile when account is deleted
   const removeInspectorProfile = (userEmail: string) => {
+    console.log('removeInspectorProfile called for userEmail:', userEmail);
+    
+    // Direct localStorage manipulation to ensure persistence
     try {
-      const profiles = safeParse<InspectorProfile[]>(
-        localStorage.getItem(SHARED_PROFILES_KEY),
-        []
-      );
-      const next = profiles.filter(p => p.email !== userEmail);
-      localStorage.setItem(SHARED_PROFILES_KEY, JSON.stringify(next));
-      setStore(prev => ({ ...prev, allInspectorProfiles: next }));
-      broadcast();
+      const currentData = localStorage.getItem(STORAGE_KEY);
+      const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
+      
+      console.log('removeInspectorProfile - All profile emails:', parsed.allInspectorProfiles.map((p: InspectorProfile) => p.email));
+      console.log('removeInspectorProfile - Looking for userEmail:', userEmail);
+      
+      // Remove the inspector profile
+      const updatedProfiles = parsed.allInspectorProfiles.filter((profile: InspectorProfile) => {
+        const shouldKeep = profile.email !== userEmail;
+        console.log(`removeInspectorProfile - Profile ${profile.email}: ${shouldKeep ? 'KEEP' : 'REMOVE'}`);
+        return shouldKeep;
+      });
+      
+      console.log('removeInspectorProfile - Profiles before:', parsed.allInspectorProfiles.length);
+      console.log('removeInspectorProfile - Profiles after:', updatedProfiles.length);
+      
+      const updatedData = {
+        ...parsed,
+        allInspectorProfiles: updatedProfiles
+      };
+      
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+      console.log('removeInspectorProfile - Direct localStorage save successful');
+      
+      // Force React to re-read from localStorage
+      setStore(updatedData);
+      console.log('removeInspectorProfile - Forced store update');
+      
+      // Trigger storage event to refresh the inspectors page
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage'));
+      }, 100);
+      
     } catch (error) {
-      console.error('removeInspectorProfile failed:', error);
+      console.error('removeInspectorProfile - localStorage backup failed:', error);
     }
   };
 
-  const getRequestById = (id: string) => store.requests.find(req => req.id === id);
-  const getMyInterests = () =>
-    store.requests.filter(req => req.interestedInspectorEmails?.includes(store.inspectorProfile.email));
+  const getRequestById = (id: string) => {
+    return store.requests.find(req => req.id === id);
+  };
 
+  const getMyInterests = () => {
+    return store.requests.filter(req => 
+      req.interestedInspectorEmails?.includes(store.inspectorProfile.email)
+    );
+  };
+
+  // Create booking request from time slot
   const createBookingFromTimeSlot = (
     timeSlotId: string,
     inspectorId: string,
     clientData: {
-      name: string; email: string; phone: string;
-      address: string; cityZip: string; propertyType: 'House' | 'Townhome' | 'Condo';
-      beds: number; baths: number; sqft?: number; notes?: string;
+      name: string;
+      email: string;
+      phone: string;
+      address: string;
+      cityZip: string;
+      propertyType: 'House' | 'Townhome' | 'Condo';
+      beds: number;
+      baths: number;
+      sqft?: number;
+      notes?: string;
     }
   ) => {
+    // Find the inspector and time slot
     const inspector = getInspectorProfileByEmail(inspectorId);
     const timeSlot = inspector?.availability?.timeSlots?.find((slot: any) => slot.id === timeSlotId);
-    if (!inspector || !timeSlot) throw new Error('Inspector or time slot not found');
+    
+    if (!inspector || !timeSlot) {
+      throw new Error('Inspector or time slot not found');
+    }
 
+
+    // Create the request
     const newRequest: Request = {
-      id: (globalThis.crypto as any)?.randomUUID?.() ?? `req_${Date.now()}`,
+      id: `req_${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'open',
       type: 'client_request',
       targetInspectorEmail: inspectorId,
-      client: { name: clientData.name, email: clientData.email, phone: clientData.phone },
+      client: {
+        name: clientData.name,
+        email: clientData.email,
+        phone: clientData.phone
+      },
       property: {
-        address: clientData.address, cityZip: clientData.cityZip,
-        type: clientData.propertyType, beds: clientData.beds, baths: clientData.baths, sqft: clientData.sqft
+        address: clientData.address,
+        cityZip: clientData.cityZip,
+        type: clientData.propertyType,
+        beds: clientData.beds,
+        baths: clientData.baths,
+        sqft: clientData.sqft
       },
       schedule: {
         preferredDate: `${timeSlot.date} ${timeSlot.startTime}-${timeSlot.endTime}`
@@ -384,19 +478,28 @@ export function useLocalStore() {
       interestedInspectorEmails: [inspectorId]
     };
 
+    // Add the request using shared storage (same method as open requests)
     try {
-      const existing = safeParse<any[]>(localStorage.getItem(SHARED_REQUESTS_KEY), []).map(normalizeRequest);
-      const updatedRequests = [newRequest, ...existing];
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = [newRequest, ...existingRequests];
       localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
-      setStore(prev => ({ ...prev, requests: updatedRequests }));
-      broadcast();
+      
+      // Update state
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
     } catch (error) {
       console.error('Error saving client request:', error);
-      setStore(prev => ({ ...prev, requests: [newRequest, ...prev.requests] }));
-      broadcast();
+      // Fallback to regular state update
+      setStore(prev => ({
+        ...prev,
+        requests: [newRequest, ...prev.requests]
+      }));
     }
 
-    // Mark time slot unavailable locally
+    // Mark time slot as unavailable
     setStore(prev => ({
       ...prev,
       allInspectorProfiles: prev.allInspectorProfiles.map(profile => {
@@ -415,106 +518,155 @@ export function useLocalStore() {
       })
     }));
 
-    // Persist updated profiles after slot change
-    try {
-      const nextProfiles = getAllInspectorProfiles();
-      localStorage.setItem(SHARED_PROFILES_KEY, JSON.stringify(nextProfiles));
-      broadcast();
-    } catch (e) {
-      console.error('Error saving shared profiles after slot change:', e);
-    }
-
     return newRequest.id;
   };
 
+  // Create open request (not tied to specific inspector)
   const createOpenRequest = (clientData: {
-    name: string; email: string; phone: string;
-    address: string; cityZip: string; propertyType: 'House' | 'Townhome' | 'Condo';
-    beds: number; baths: number; sqft?: number; preferredDate: string; altDate?: string; budget?: number; notes?: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    cityZip: string;
+    propertyType: 'House' | 'Townhome' | 'Condo';
+    beds: number;
+    baths: number;
+    sqft?: number;
+    preferredDate: string;
+    altDate?: string;
+    budget?: number;
+    notes?: string;
   }) => {
     const newRequest: Request = {
-      id: (globalThis.crypto as any)?.randomUUID?.() ?? `req_${Date.now()}`,
+      id: `req_${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'open',
-      type: 'open_request',
-      client: { name: clientData.name, email: clientData.email, phone: clientData.phone },
-      property: {
-        address: clientData.address, cityZip: clientData.cityZip,
-        type: clientData.propertyType, beds: clientData.beds, baths: clientData.baths, sqft: clientData.sqft
+      type: 'open_request', // This is an open request for all inspectors
+      client: {
+        name: clientData.name,
+        email: clientData.email,
+        phone: clientData.phone
       },
-      schedule: { preferredDate: clientData.preferredDate, altDate: clientData.altDate },
+      property: {
+        address: clientData.address,
+        cityZip: clientData.cityZip,
+        type: clientData.propertyType,
+        beds: clientData.beds,
+        baths: clientData.baths,
+        sqft: clientData.sqft
+      },
+      schedule: {
+        preferredDate: clientData.preferredDate,
+        altDate: clientData.altDate
+      },
       budget: clientData.budget,
       notes: clientData.notes || '',
       interestCount: 0,
       interestedInspectorEmails: []
     };
 
-    try {
-      const existing = safeParse<any[]>(localStorage.getItem(SHARED_REQUESTS_KEY), []).map(normalizeRequest);
-      const updated = [newRequest, ...existing];
-      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updated));
-      setStore(prev => ({ ...prev, requests: updated }));
-      broadcast();
-    } catch (error) {
-      console.error('Error adding open request:', error);
-      setStore(prev => ({ ...prev, requests: [newRequest, ...prev.requests] }));
-      broadcast();
-    }
+    // Add the request
+    setStore(prev => ({
+      ...prev,
+      requests: [newRequest, ...prev.requests]
+    }));
 
     return newRequest.id;
   };
 
-  const getClientRequests = (clientEmail: string) =>
-    store.requests.filter(req => req.client.email === clientEmail && (req.type === 'open_request' || req.type === 'client_request'));
+  // Get requests created by a specific client (by email)
+  const getClientRequests = (clientEmail: string) => {
+    // Show ALL requests created by this client (both open_request and client_request types)
+    return store.requests.filter(req => 
+      req.client.email === clientEmail && 
+      (req.type === 'open_request' || req.type === 'client_request')
+    );
+  };
 
-  const updateRequest = (
-    requestId: string,
-    clientEmail: string,
-    updates: Partial<Omit<Request, 'id' | 'createdAt'>>
-  ) => {
-    const found = store.requests.find(r => r.id === requestId);
-    if (!found || found.client.email !== clientEmail) throw new Error('Request not found or unauthorized');
+  // Update a request (only if it belongs to the client)
+  const updateRequest = (requestId: string, clientEmail: string, updates: Partial<Omit<Request, 'id' | 'createdAt'>>) => {
+    const request = store.requests.find(r => r.id === requestId);
+    if (!request || request.client.email !== clientEmail) {
+      throw new Error('Request not found or unauthorized');
+    }
 
+    // Update in shared localStorage first
     try {
-      const existing = safeParse<any[]>(localStorage.getItem(SHARED_REQUESTS_KEY), []).map(normalizeRequest);
-      const updatedRequests = existing.map(req => (req.id === requestId ? { ...req, ...updates } as Request : req));
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = existingRequests.map((req: any) =>
+        req.id === requestId ? { ...req, ...updates } : req
+      );
       localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
-      setStore(prev => ({ ...prev, requests: updatedRequests }));
-      broadcast();
-    } catch (error) {
-      console.error('Error updating request in localStorage:', error);
+      
+      // Update React state to match localStorage
       setStore(prev => ({
         ...prev,
-        requests: prev.requests.map(req => (req.id === requestId ? ({ ...req, ...updates } as Request) : req))
+        requests: updatedRequests
       }));
-      broadcast();
+    } catch (error) {
+      console.error('Error updating request in localStorage:', error);
+      // Fallback to state-only update
+      setStore(prev => ({
+        ...prev,
+        requests: prev.requests.map(req =>
+          req.id === requestId ? { ...req, ...updates } : req
+        )
+      }));
     }
   };
 
+  // Delete a request (only if it belongs to the client)
   const deleteRequest = (requestId: string, clientEmail: string) => {
-    const found = store.requests.find(r => r.id === requestId);
-    if (!found || found.client.email !== clientEmail) throw new Error('Request not found or unauthorized');
+    const request = store.requests.find(r => r.id === requestId);
+    if (!request || request.client.email !== clientEmail) {
+      throw new Error('Request not found or unauthorized');
+    }
 
+    // Remove from shared localStorage first
     try {
-      const existing = safeParse<any[]>(localStorage.getItem(SHARED_REQUESTS_KEY), []).map(normalizeRequest);
-      const updatedRequests = existing.filter(req => req.id !== requestId);
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = existingRequests.filter((req: any) => req.id !== requestId);
       localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
-      setStore(prev => ({ ...prev, requests: updatedRequests }));
-      broadcast();
+      
+      // Update React state to match localStorage
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
     } catch (error) {
       console.error('Error deleting request from localStorage:', error);
-      setStore(prev => ({ ...prev, requests: prev.requests.filter(req => req.id !== requestId) }));
-      broadcast();
+      // Fallback to state-only update
+      setStore(prev => ({
+        ...prev,
+        requests: prev.requests.filter(req => req.id !== requestId)
+      }));
     }
 
-    // (optional) free timeslot logic could persist profiles here if you modify availability
-  };
-
-  const debugLocalStorage = () => {
-    console.log('🔍 [DEBUG STORAGE] Keys:', Object.keys(localStorage));
-    console.log('🔍 Requests:', localStorage.getItem(SHARED_REQUESTS_KEY));
-    console.log('🔍 Profiles:', localStorage.getItem(SHARED_PROFILES_KEY));
-    console.log('🔍 Store state:', store);
+    // If it was a client_request, mark the time slot as available again
+    if (request.type === 'client_request' && request.targetInspectorEmail) {
+      setStore(prev => ({
+        ...prev,
+        allInspectorProfiles: prev.allInspectorProfiles.map(profile => {
+          if (profile.email === request.targetInspectorEmail && profile.availability?.timeSlots) {
+            return {
+              ...profile,
+              availability: {
+                ...profile.availability,
+                timeSlots: profile.availability.timeSlots.map(slot => {
+                  // Check if this slot matches the request's preferred date/time
+                  const preferredDateTime = request.schedule.preferredDate;
+                  const slotDateTime = `${slot.date} ${slot.startTime}-${slot.endTime}`;
+                  return slotDateTime === preferredDateTime ? { ...slot, available: true } : slot;
+                })
+              }
+            };
+          }
+          return profile;
+        })
+      }));
+    }
   };
 
   return {
@@ -531,11 +683,12 @@ export function useLocalStore() {
     removeInspectorProfile,
     getRequestById,
     getMyInterests,
-    debugLocalStorage,
+    clearAllData,
     createBookingFromTimeSlot,
     createOpenRequest,
     getClientRequests,
     updateRequest,
-    deleteRequest
+    deleteRequest,
+    debugLocalStorage
   };
 }
