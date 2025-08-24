@@ -131,17 +131,36 @@ export function useLocalStore() {
     console.log('Created new request:', newRequest);
     console.log('Current store before update:', store);
     
-    setStore(prev => {
+    // Use functional state update with explicit logging
+    const updateFunction = (prev: LocalStore) => {
       console.log('setStore prev state:', prev);
       const updated = {
         ...prev,
         requests: [newRequest, ...prev.requests]
       };
       console.log('setStore new state:', updated);
+      
+      // Immediately save to localStorage as backup
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        console.log('Manually saved to localStorage:', updated);
+      } catch (error) {
+        console.error('Manual save failed:', error);
+      }
+      
       return updated;
-    });
+    };
     
-    console.log('Store after setStore call:', store);
+    console.log('About to call setStore with function...');
+    setStore(updateFunction);
+    
+    console.log('setStore called, waiting for React update...');
+    
+    // Use setTimeout to check store after React state update
+    setTimeout(() => {
+      console.log('Store after React update (delayed):', store);
+    }, 100);
+    
     return newRequest.id;
   };
 
