@@ -466,19 +466,22 @@ export function useLocalStore() {
     };
 
     // Add the request using shared storage (same method as open requests)
+    console.log('📋 [CLIENT BOOKING] Creating client request:', newRequest);
     try {
       const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
       const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
       const updatedRequests = [newRequest, ...existingRequests];
       localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
+      console.log('📋 [CLIENT BOOKING] Saved to localStorage, total requests:', updatedRequests.length);
       
       // Update state
       setStore(prev => ({
         ...prev,
         requests: updatedRequests
       }));
+      console.log('📋 [CLIENT BOOKING] Client request created successfully with ID:', newRequest.id);
     } catch (error) {
-      console.error('Error saving client request:', error);
+      console.error('📋 [CLIENT BOOKING] Error saving client request:', error);
       // Fallback to regular state update
       setStore(prev => ({
         ...prev,
@@ -563,12 +566,28 @@ export function useLocalStore() {
 
   // Get requests created by a specific client (by email)
   const getClientRequests = (clientEmail: string) => {
-    // Show ALL requests created by this client (both open_request and client_request types)
-    const clientRequests = store.requests.filter(req => 
-      req.client.email === clientEmail && 
-      (req.type === 'open_request' || req.type === 'client_request')
-    );
+    console.log('📋 [GET CLIENT REQUESTS] Looking for requests by email:', clientEmail);
+    console.log('📋 [GET CLIENT REQUESTS] Total requests in store:', store.requests.length);
+    console.log('📋 [GET CLIENT REQUESTS] All requests:', store.requests);
     
+    // Show ALL requests created by this client (both open_request and client_request types)
+    const clientRequests = store.requests.filter(req => {
+      const emailMatch = req.client.email === clientEmail;
+      const typeMatch = req.type === 'open_request' || req.type === 'client_request';
+      console.log('📋 [GET CLIENT REQUESTS] Request check:', {
+        requestId: req.id,
+        requestEmail: req.client.email,
+        clientEmail,
+        emailMatch,
+        type: req.type,
+        typeMatch,
+        finalMatch: emailMatch && typeMatch
+      });
+      return emailMatch && typeMatch;
+    });
+    
+    console.log('📋 [GET CLIENT REQUESTS] Filtered results:', clientRequests.length, 'requests');
+    console.log('📋 [GET CLIENT REQUESTS] Results:', clientRequests);
     
     return clientRequests;
   };
