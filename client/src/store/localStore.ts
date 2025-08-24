@@ -41,11 +41,11 @@ interface LocalStore {
 }
 
 const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
-  id: 'demo_inspector_1',
-  displayName: 'Ava Patel',
-  serviceAreas: ['Irvine', 'Tustin'],
-  specialties: ['Roof', 'Foundation'],
-  basePrice: 350
+  id: 'inspector_demo',
+  displayName: 'Demo Inspector',
+  serviceAreas: ['San Francisco', 'Oakland', 'San Jose', 'Palo Alto'],
+  specialties: ['Foundation', 'Electrical', 'Plumbing', 'HVAC'],
+  basePrice: 400
 };
 
 const STORAGE_KEY = 'inspect_now_store';
