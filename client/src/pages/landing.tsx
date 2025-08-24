@@ -58,6 +58,20 @@ export default function Landing() {
                     Search
                   </Button>
                 </form>
+                
+                {/* Alternative Action */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <p className="text-secondary text-center mb-4">Or let inspectors come to you:</p>
+                  <Button 
+                    onClick={() => setLocation('/post')}
+                    variant="outline"
+                    className="w-full py-3 text-lg border-2 border-primary text-primary hover:bg-primary hover:text-white"
+                    data-testid="button-post-request-cta"
+                  >
+                    <FileText className="mr-2 h-5 w-5" />
+                    Post Your Inspection Request
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

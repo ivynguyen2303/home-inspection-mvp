@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, Briefcase, MapPin, DollarSign, Calendar } from "lucide-react";
+import { Star, Briefcase, MapPin, DollarSign, Calendar, FileText } from "lucide-react";
 import { useLocalStore, type InspectorProfile } from "@/store/localStore";
 import { useAuth } from "@/auth/AuthProvider";
 import { mockInspectors } from "@/data/mockInspectors";
@@ -108,12 +108,26 @@ export default function Inspectors() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Directory Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-secondary mb-2" data-testid="text-inspectors-title">
-            Licensed Home Inspectors
-          </h1>
-          <p className="text-muted" data-testid="text-inspectors-count">
-            {inspectors.length} licensed inspectors available
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-secondary mb-2" data-testid="text-inspectors-title">
+                Licensed Home Inspectors
+              </h1>
+              <p className="text-muted" data-testid="text-inspectors-count">
+                {inspectors.length} licensed inspectors available
+              </p>
+            </div>
+            
+            {/* Post Request CTA for clients */}
+            {user && user.role === 'client' && (
+              <Link href="/post">
+                <Button className="bg-accent hover:bg-green-600 text-white whitespace-nowrap" data-testid="button-post-request">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Post Request Instead
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Inspectors Grid */}
