@@ -522,11 +522,28 @@ export function useLocalStore() {
       interestedInspectorEmails: [inspectorId]
     };
 
-    // Add the request
-    setStore(prev => ({
-      ...prev,
-      requests: [newRequest, ...prev.requests]
-    }));
+    // Add the request using shared storage (same method as open requests)
+    console.log('📋 [CLIENT REQUEST] Creating client request:', newRequest);
+    try {
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = [newRequest, ...existingRequests];
+      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
+      console.log('📋 [CLIENT REQUEST] Saved to shared storage, total requests:', updatedRequests.length);
+      
+      // Update state
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
+    } catch (error) {
+      console.error('📋 [CLIENT REQUEST] Error saving:', error);
+      // Fallback to regular state update
+      setStore(prev => ({
+        ...prev,
+        requests: [newRequest, ...prev.requests]
+      }));
+    }
 
     // Mark time slot as unavailable
     setStore(prev => ({
