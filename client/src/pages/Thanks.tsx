@@ -60,7 +60,7 @@ export default function Thanks() {
                 </Button>
               </Link>
               
-              <Link href="/requests">
+              <Link href="/my-requests">
                 <Button className="w-full sm:w-auto bg-primary hover:bg-blue-700" data-testid="button-view-requests">
                   View All Requests
                   <ArrowRight className="ml-2 h-4 w-4" />
