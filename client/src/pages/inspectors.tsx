@@ -7,56 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Star, Briefcase, MapPin, DollarSign, Calendar, FileText } from "lucide-react";
 import { useLocalStore, type InspectorProfile } from "@/store/localStore";
 import { useAuth } from "@/auth/AuthProvider";
-import { mockInspectors } from "@/data/mockInspectors";
 
 
 export default function Inspectors() {
   const [inspectors, setInspectors] = useState<InspectorProfile[]>([]);
-  const { getAllInspectorProfiles, clearMockDataForRealAccounts } = useLocalStore();
+  const { getAllInspectorProfiles } = useLocalStore();
   const { user } = useAuth();
 
   const loadInspectors = () => {
-    // Load real inspector profiles from signup
+    // Load only real inspector profiles from signup
     const realProfiles = getAllInspectorProfiles();
-    
-    // Check if current user is a demo account - check both client and inspector demo accounts
-    const isDemoAccount = user?.email === 'client_demo@example.com' || user?.email === 'inspector_demo@example.com';
-    
-    if (isDemoAccount) {
-      // For demo accounts, show mock data + any real profiles
-      const mockProfiles = mockInspectors.inspectors.map(mock => ({
-        id: mock.id,
-        displayName: mock.name,
-        serviceAreas: mock.serviceAreas,
-        specialties: mock.specialties,
-        basePrice: mock.basePrice,
-        email: mock.contact.email,
-        phone: mock.contact.phone,
-        location: mock.location,
-        bio: mock.bio,
-        yearsExperience: mock.yearsExperience,
-        certifications: mock.certifications,
-        rating: mock.rating,
-        reviewCount: mock.reviewCount,
-        completedInspections: mock.completedInspections,
-        image: mock.image,
-        verified: mock.verified,
-        availability: mock.availability,
-        contact: mock.contact,
-        insurance: mock.insurance
-      }));
-      
-      // Combine mock profiles with real profiles for demo
-      const allProfiles = [...mockProfiles, ...realProfiles];
-      setInspectors(allProfiles);
-    } else {
-      // For real accounts, ONLY show real inspector profiles (no mock data)
-      console.log('Real account - showing only real profiles:', realProfiles.length);
-      console.log('User email:', user?.email, 'Is demo?', isDemoAccount);
-      // Clear any mock data that might have persisted from localStorage
-      clearMockDataForRealAccounts();
-      setInspectors(realProfiles);
-    }
+    setInspectors(realProfiles);
   };
 
   useEffect(() => {
@@ -132,7 +93,7 @@ export default function Inspectors() {
         </div>
 
         {/* Inspectors Grid */}
-        {inspectors.length === 0 && !user?.email?.includes('demo') ? (
+        {inspectors.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold text-secondary mb-4">No Inspectors Found</h2>
             <p className="text-muted mb-6">

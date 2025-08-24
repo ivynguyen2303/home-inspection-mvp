@@ -17,8 +17,6 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useLocalStore, type InspectorProfile } from "@/store/localStore";
-import { useAuth } from "@/auth/AuthProvider";
-import { mockInspectors } from "@/data/mockInspectors";
 
 
 export default function InspectorProfile() {
@@ -26,48 +24,16 @@ export default function InspectorProfile() {
   const [inspector, setInspector] = useState<InspectorProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { getInspectorProfileById } = useLocalStore();
-  const { user } = useAuth();
 
   useEffect(() => {
     if (!match || !params?.id) return;
 
-    // Try to find real inspector profile first
-    let foundInspector = getInspectorProfileById(params.id);
-    
-    // Check if current user is a demo account - only show mock data for demo accounts
-    const isDemoAccount = user?.email === 'client_demo@example.com' || user?.email === 'inspector_demo@example.com';
-    
-    // Fall back to mock data only if no real profile exists AND user is demo account
-    if (!foundInspector && isDemoAccount) {
-      const mockInspector = mockInspectors.inspectors.find(insp => insp.id === params.id);
-      if (mockInspector) {
-        foundInspector = {
-          id: mockInspector.id,
-          displayName: mockInspector.name,
-          serviceAreas: mockInspector.serviceAreas,
-          specialties: mockInspector.specialties,
-          basePrice: mockInspector.basePrice,
-          email: mockInspector.contact.email,
-          phone: mockInspector.contact.phone,
-          location: mockInspector.location,
-          bio: mockInspector.bio,
-          yearsExperience: mockInspector.yearsExperience,
-          certifications: mockInspector.certifications,
-          rating: mockInspector.rating,
-          reviewCount: mockInspector.reviewCount,
-          completedInspections: mockInspector.completedInspections,
-          image: mockInspector.image,
-          verified: mockInspector.verified,
-          availability: mockInspector.availability,
-          contact: mockInspector.contact,
-          insurance: mockInspector.insurance
-        };
-      }
-    }
+    // Find real inspector profile
+    const foundInspector = getInspectorProfileById(params.id);
     
     setInspector(foundInspector || null);
     setLoading(false);
-  }, [match, params?.id, getInspectorProfileById, user?.email]);
+  }, [match, params?.id, getInspectorProfileById]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);

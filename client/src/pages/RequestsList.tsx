@@ -6,23 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalStore } from '@/store/localStore';
-import { useAuth } from '@/auth/AuthProvider';
 import { Search, Filter, Briefcase } from 'lucide-react';
 
 export default function RequestsList() {
-  const { requests, loadMockRequestsForDemo } = useLocalStore();
-  const { user } = useAuth();
+  const { requests } = useLocalStore();
   const [cityFilter, setCityFilter] = useState('');
   const [propertyTypeFilter, setPropertyTypeFilter] = useState('');
   const [earliestDateFilter, setEarliestDateFilter] = useState('');
 
-  // Load demo data only for demo accounts
-  useEffect(() => {
-    const isDemoAccount = user?.email === 'client_demo@example.com' || user?.email === 'inspector_demo@example.com';
-    if (isDemoAccount && requests.length === 0) {
-      loadMockRequestsForDemo();
-    }
-  }, [user?.email, requests.length, loadMockRequestsForDemo]);
+  // No mock data loading - only real requests
 
   const filteredRequests = useMemo(() => {
     return requests

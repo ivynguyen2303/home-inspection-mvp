@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { mockRequests } from '@/data/mockRequests';
-import { mockInspectors } from '@/data/mockInspectors';
 
 export interface Request {
   id: string;
@@ -93,43 +91,14 @@ export function useLocalStore() {
     };
   });
 
-  // Clear localStorage and reset data for new sessions - this ensures no mock data persists for real accounts
-  const clearMockDataForRealAccounts = () => {
-    // This will be called by components that have access to user info to clean up mock data
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    
-    // If we have stored data but it contains mock inspector IDs, clean it up
-    if (stored.allInspectorProfiles) {
-      const mockInspectorIds = mockInspectors.inspectors.map((i: any) => i.id);
-      const cleanProfiles = stored.allInspectorProfiles.filter(
-        (profile: InspectorProfile) => !mockInspectorIds.includes(profile.id)
-      );
-      
-      // Also clean up mock requests that might have inspector IDs from mock data
-      const cleanRequests = stored.requests ? stored.requests.filter((req: any) => {
-        // Remove requests that reference mock inspectors
-        if (req.interestedInspectorIds && req.interestedInspectorIds.some((id: string) => mockInspectorIds.includes(id))) {
-          return false;
-        }
-        return true;
-      }) : [];
-      
-      const cleanedStore = {
-        ...stored,
-        allInspectorProfiles: cleanProfiles,
-        requests: cleanRequests
-      };
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedStore));
-      setStore(cleanedStore);
-    }
-  };
-
-  // Load mock requests conditionally - we'll let components decide when to load them
-  const loadMockRequestsForDemo = () => {
-    if (store.requests.length === 0 && mockRequests.length > 0) {
-      setStore(prev => ({ ...prev, requests: mockRequests }));
-    }
+  // Clear all data function
+  const clearAllData = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setStore({
+      requests: [],
+      inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
+      allInspectorProfiles: []
+    });
   };
 
   // Save to localStorage whenever store changes
@@ -238,7 +207,6 @@ export function useLocalStore() {
     getInspectorProfileById,
     getRequestById,
     getMyInterests,
-    clearMockDataForRealAccounts,
-    loadMockRequestsForDemo
+    clearAllData
   };
 }

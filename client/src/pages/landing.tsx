@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useLocalStore } from "@/store/localStore";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,12 @@ import { Search, MapPin, Tag, Clock, FileText } from "lucide-react";
 export default function Landing() {
   const [, setLocation] = useLocation();
   const [searchLocation, setSearchLocation] = useState("");
+  const { clearAllData } = useLocalStore();
+
+  // Clear all existing data on first load to ensure fresh start
+  useEffect(() => {
+    clearAllData();
+  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
