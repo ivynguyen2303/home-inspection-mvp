@@ -131,35 +131,52 @@ export function useLocalStore() {
     console.log('Created new request:', newRequest);
     console.log('Current store before update:', store);
     
-    // Use functional state update with explicit logging
-    const updateFunction = (prev: LocalStore) => {
-      console.log('setStore prev state:', prev);
-      const updated = {
-        ...prev,
-        requests: [newRequest, ...prev.requests]
-      };
-      console.log('setStore new state:', updated);
-      
-      // Immediately save to localStorage as backup
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        console.log('Manually saved to localStorage:', updated);
-      } catch (error) {
-        console.error('Manual save failed:', error);
-      }
-      
-      return updated;
+    // Create updated store data
+    const updatedStore = {
+      ...store,
+      requests: [newRequest, ...store.requests]
     };
+    console.log('Manual updated store:', updatedStore);
     
-    console.log('About to call setStore with function...');
-    setStore(updateFunction);
+    // Save directly to localStorage FIRST
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedStore));
+      console.log('Saved to localStorage successfully');
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error);
+    }
     
-    console.log('setStore called, waiting for React update...');
+    // Try multiple React state update approaches
+    console.log('Trying approach 1: Direct object');
+    setStore(updatedStore);
     
-    // Use setTimeout to check store after React state update
     setTimeout(() => {
-      console.log('Store after React update (delayed):', store);
-    }, 100);
+      console.log('Trying approach 2: Functional update');
+      setStore(prev => {
+        console.log('Functional update prev:', prev);
+        const result = { ...prev, requests: [newRequest, ...prev.requests] };
+        console.log('Functional update result:', result);
+        return result;
+      });
+    }, 10);
+    
+    setTimeout(() => {
+      console.log('Trying approach 3: Force re-read from localStorage');
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          console.log('Re-read from localStorage:', parsed);
+          setStore(parsed);
+        }
+      } catch (error) {
+        console.error('Failed to re-read:', error);
+      }
+    }, 50);
+    
+    setTimeout(() => {
+      console.log('Final store check:', store);
+    }, 200);
     
     return newRequest.id;
   };
