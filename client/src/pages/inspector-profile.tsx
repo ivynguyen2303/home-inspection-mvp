@@ -14,24 +14,55 @@ import {
   Mail, 
   Phone, 
   Clock,
-  Lock
+  ExternalLink
 } from "lucide-react";
-import { mockInspectors, type Inspector } from "@/data/mockInspectors";
+import { useLocalStore, type InspectorProfile } from "@/store/localStore";
+import { mockInspectors } from "@/data/mockInspectors";
 
 
 export default function InspectorProfile() {
   const [match, params] = useRoute("/inspectors/:id");
-  const [inspector, setInspector] = useState<Inspector | null>(null);
+  const [inspector, setInspector] = useState<InspectorProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const { getInspectorProfileById } = useLocalStore();
 
   useEffect(() => {
     if (!match || !params?.id) return;
 
-    // Load mock inspector data
-    const foundInspector = mockInspectors.inspectors.find((insp: Inspector) => insp.id === params.id);
+    // Try to find real inspector profile first
+    let foundInspector = getInspectorProfileById(params.id);
+    
+    // Fall back to mock data if no real profile exists
+    if (!foundInspector) {
+      const mockInspector = mockInspectors.inspectors.find(insp => insp.id === params.id);
+      if (mockInspector) {
+        foundInspector = {
+          id: mockInspector.id,
+          displayName: mockInspector.name,
+          serviceAreas: mockInspector.serviceAreas,
+          specialties: mockInspector.specialties,
+          basePrice: mockInspector.basePrice,
+          email: mockInspector.contact.email,
+          phone: mockInspector.contact.phone,
+          location: mockInspector.location,
+          bio: mockInspector.bio,
+          yearsExperience: mockInspector.yearsExperience,
+          certifications: mockInspector.certifications,
+          rating: mockInspector.rating,
+          reviewCount: mockInspector.reviewCount,
+          completedInspections: mockInspector.completedInspections,
+          image: mockInspector.image,
+          verified: mockInspector.verified,
+          availability: mockInspector.availability,
+          contact: mockInspector.contact,
+          insurance: mockInspector.insurance
+        };
+      }
+    }
+    
     setInspector(foundInspector || null);
     setLoading(false);
-  }, [match, params?.id]);
+  }, [match, params?.id, getInspectorProfileById]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -89,37 +120,37 @@ export default function InspectorProfile() {
               <CardContent className="p-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                   <img 
-                    src={inspector.image} 
-                    alt={`${inspector.name} Profile Photo`} 
+                    src={inspector.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face'} 
+                    alt={`${inspector.displayName} Profile Photo`} 
                     className="w-24 h-24 rounded-full object-cover"
                     data-testid="img-inspector-profile"
                   />
                   <div className="flex-1">
                     <h1 className="text-3xl font-bold text-secondary mb-2" data-testid="text-inspector-name">
-                      {inspector.name}
+                      {inspector.displayName}
                     </h1>
                     <p className="text-muted mb-2" data-testid="text-inspector-location">
-                      {inspector.location}
+                      {inspector.location || 'San Francisco, CA'}
                     </p>
                     <div className="flex items-center mb-3">
                       <div className="flex mr-2">
                         {renderStars(inspector.rating)}
                       </div>
                       <span className="text-secondary font-medium" data-testid="text-inspector-rating">
-                        {inspector.rating}
+                        {inspector.rating || 5.0}
                       </span>
                       <span className="text-muted ml-1" data-testid="text-inspector-reviews">
-                        ({inspector.reviewCount} reviews)
+                        ({inspector.reviewCount || 0} reviews)
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm">
                       <div className="flex items-center text-muted">
                         <Briefcase className="mr-1 h-4 w-4" />
-                        <span data-testid="text-inspector-experience">{inspector.yearsExperience} years</span>
+                        <span data-testid="text-inspector-experience">{inspector.yearsExperience || 1} years</span>
                       </div>
                       <div className="flex items-center text-muted">
                         <Tag className="mr-1 h-4 w-4" />
-                        <span data-testid="text-inspector-certification">{inspector.certifications[0]}</span>
+                        <span data-testid="text-inspector-certification">{inspector.certifications?.[0] || 'State Licensed'}</span>
                       </div>
                       <div className="flex items-center text-accent">
                         <Shield className="mr-1 h-4 w-4" />
@@ -136,7 +167,7 @@ export default function InspectorProfile() {
               <CardContent className="p-8">
                 <h2 className="text-2xl font-semibold text-secondary mb-4" data-testid="text-about-title">About</h2>
                 <p className="text-muted mb-6" data-testid="text-inspector-bio">
-                  {inspector.bio}
+                  {inspector.bio || 'Professional home inspector with expertise in residential property assessments.'}
                 </p>
                 
                 <h3 className="text-lg font-semibold text-secondary mb-3" data-testid="text-service-areas-title">Service Areas</h3>
@@ -218,15 +249,14 @@ export default function InspectorProfile() {
                   </div>
                   
                   <Button 
-                    className="w-full bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg cursor-not-allowed mb-3"
-                    disabled
+                    className="w-full bg-primary hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors mb-3"
                     data-testid="button-request-booking"
                   >
-                    <Lock className="mr-2 h-4 w-4" />
-                    Request Booking (Demo)
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Contact Inspector
                   </Button>
                   <p className="text-xs text-muted text-center">
-                    This is a demo. Booking functionality would be implemented here.
+                    Contact directly via email or phone to schedule your inspection.
                   </p>
                 </CardContent>
               </Card>
@@ -243,7 +273,7 @@ export default function InspectorProfile() {
                       <div>
                         <div className="text-sm text-muted">Email</div>
                         <div className="text-secondary font-medium" data-testid="text-inspector-email">
-                          {inspector.contact.email}
+                          {inspector.contact?.email || inspector.email}
                         </div>
                       </div>
                     </div>
@@ -255,7 +285,7 @@ export default function InspectorProfile() {
                       <div>
                         <div className="text-sm text-muted">Phone</div>
                         <div className="text-secondary font-medium" data-testid="text-inspector-phone">
-                          {inspector.contact.phone}
+                          {inspector.contact?.phone || inspector.phone || '(555) 123-4567'}
                         </div>
                       </div>
                     </div>
@@ -264,11 +294,11 @@ export default function InspectorProfile() {
                     <div className="text-xs text-muted">
                       <p className="mb-2">
                         <Clock className="inline mr-1 h-3 w-3" />
-                        Response time: {inspector.availability.responseTime}
+                        Response time: {inspector.availability?.responseTime || 'Within 4 hours'}
                       </p>
                       <p>
                         <Shield className="inline mr-1 h-3 w-3" />
-                        {inspector.insurance}
+                        {inspector.insurance || '$1M Professional Liability'}
                       </p>
                     </div>
                   </div>

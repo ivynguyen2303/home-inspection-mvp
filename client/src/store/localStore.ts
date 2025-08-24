@@ -34,11 +34,33 @@ export interface InspectorProfile {
   serviceAreas: string[];
   specialties: string[];
   basePrice: number;
+  email?: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  yearsExperience?: number;
+  certifications?: string[];
+  rating?: number;
+  reviewCount?: number;
+  completedInspections?: number;
+  image?: string;
+  verified?: boolean;
+  availability?: {
+    nextAvailable: string;
+    responseTime: string;
+  };
+  contact?: {
+    phone: string;
+    email: string;
+    website?: string;
+  };
+  insurance?: string;
 }
 
 interface LocalStore {
   requests: Request[];
   inspectorProfile: InspectorProfile;
+  allInspectorProfiles: InspectorProfile[];
 }
 
 const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
@@ -65,7 +87,8 @@ export function useLocalStore() {
     // Load initial data from example file
     return {
       requests: [],
-      inspectorProfile: DEFAULT_INSPECTOR_PROFILE
+      inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
+      allInspectorProfiles: []
     };
   });
 
@@ -125,10 +148,34 @@ export function useLocalStore() {
 
 
   const updateInspectorProfile = (updates: Partial<InspectorProfile>) => {
+    setStore(prev => {
+      const updatedProfile = { ...prev.inspectorProfile, ...updates };
+      // Also update in the all profiles list
+      const updatedAllProfiles = prev.allInspectorProfiles.map(profile => 
+        profile.id === updatedProfile.id ? updatedProfile : profile
+      );
+      
+      return {
+        ...prev,
+        inspectorProfile: updatedProfile,
+        allInspectorProfiles: updatedAllProfiles
+      };
+    });
+  };
+
+  const addInspectorProfile = (profile: InspectorProfile) => {
     setStore(prev => ({
       ...prev,
-      inspectorProfile: { ...prev.inspectorProfile, ...updates }
+      allInspectorProfiles: [...prev.allInspectorProfiles.filter(p => p.id !== profile.id), profile]
     }));
+  };
+
+  const getAllInspectorProfiles = () => {
+    return store.allInspectorProfiles;
+  };
+
+  const getInspectorProfileById = (id: string) => {
+    return store.allInspectorProfiles.find(profile => profile.id === id);
   };
 
   const getRequestById = (id: string) => {
@@ -144,9 +191,13 @@ export function useLocalStore() {
   return {
     requests: store.requests,
     inspectorProfile: store.inspectorProfile,
+    allInspectorProfiles: store.allInspectorProfiles,
     addRequest,
     toggleInterest,
     updateInspectorProfile,
+    addInspectorProfile,
+    getAllInspectorProfiles,
+    getInspectorProfileById,
     getRequestById,
     getMyInterests
   };
