@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -36,6 +37,7 @@ export function AvailabilityManager() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<string | null>(null);
+  const [clearAllDialogOpen, setClearAllDialogOpen] = useState(false);
 
   const form = useForm<TimeSlotFormData>({
     resolver: zodResolver(timeSlotSchema),
@@ -185,6 +187,24 @@ export function AvailabilityManager() {
     });
   };
 
+  const clearAllTimeSlots = () => {
+    updateInspectorProfile({
+      availability: {
+        ...inspectorProfile.availability,
+        nextAvailable: inspectorProfile.availability?.nextAvailable || 'This week',
+        responseTime: inspectorProfile.availability?.responseTime || 'Within 4 hours',
+        timeSlots: []
+      }
+    });
+
+    toast({
+      title: "All Time Slots Cleared",
+      description: "All available time slots have been removed.",
+    });
+
+    setClearAllDialogOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Quick Settings */}
@@ -243,7 +263,43 @@ export function AvailabilityManager() {
               <CalendarIcon className="mr-2 h-5 w-5" />
               Available Time Slots
             </CardTitle>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <div className="flex space-x-2">
+              {timeSlots.length > 0 && (
+                <AlertDialog open={clearAllDialogOpen} onOpenChange={setClearAllDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                      data-testid="button-clear-all-slots"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Clear All
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Clear All Time Slots</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete all {timeSlots.length} time slots from your availability. 
+                        This action cannot be undone. Are you sure you want to continue?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel data-testid="button-cancel-clear-all">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={clearAllTimeSlots}
+                        className="bg-red-600 hover:bg-red-700"
+                        data-testid="button-confirm-clear-all"
+                      >
+                        Clear All Slots
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button data-testid="button-add-time-slot">
                   <Plus className="mr-2 h-4 w-4" />
@@ -474,7 +530,8 @@ export function AvailabilityManager() {
                   </form>
                 </Form>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
