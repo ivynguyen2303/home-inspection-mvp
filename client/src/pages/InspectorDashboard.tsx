@@ -14,22 +14,22 @@ export default function InspectorDashboard() {
   const { requests, getMyInterests, inspectorProfile } = useLocalStore();
   const [activeTab, setActiveTab] = useState('requests');
   
-  // Debug: Check all requests and filtering
-  console.log('Inspector Dashboard - All requests:', requests);
-  console.log('Inspector Dashboard - Total requests:', requests.length);
-  
-  const openRequests = requests.filter(req => {
-    const isOpen = req.status === 'open' && req.type === 'open_request';
-    console.log(`Request ${req.id}: status=${req.status}, type=${req.type}, isOpenRequest=${isOpen}`);
-    return isOpen;
-  });
-  
-  const clientRequests = requests.filter(req => 
-    req.status === 'open' && req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id
+  // Filter requests for this inspector only
+  const openRequests = requests.filter(req => 
+    req.status === 'open' && req.type === 'open_request'
   );
   
-  console.log('Inspector Dashboard - Open requests found:', openRequests.length);
-  console.log('Inspector Dashboard - Client requests found:', clientRequests.length);
+  // IMPORTANT: Client requests should ONLY show for the targeted inspector
+  const clientRequests = requests.filter(req => {
+    // Triple-check the filtering to ensure bulletproof targeting
+    const isOpen = req.status === 'open';
+    const isClientRequest = req.type === 'client_request';
+    const isTargetedToMe = req.targetInspectorId && 
+                          inspectorProfile.id && 
+                          String(req.targetInspectorId) === String(inspectorProfile.id);
+    
+    return isOpen && isClientRequest && isTargetedToMe;
+  });
   const myInterests = getMyInterests();
 
   return (

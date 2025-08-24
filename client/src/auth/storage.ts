@@ -12,7 +12,7 @@ export async function hashPassword(password: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// User storage functions
+// User storage functions - start with empty data
 export function getUsers(): User[] {
   try {
     const stored = localStorage.getItem(USERS_KEY);

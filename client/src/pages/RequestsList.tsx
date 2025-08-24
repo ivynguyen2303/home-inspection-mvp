@@ -24,7 +24,10 @@ export default function RequestsList() {
         if (req.type === 'open_request') {
           return true; // All inspectors can see open requests
         } else if (req.type === 'client_request') {
-          return req.targetInspectorId === inspectorProfile.id; // Only target inspector can see
+          // Bulletproof filtering: client requests only for the targeted inspector
+          return req.targetInspectorId && 
+                 inspectorProfile.id && 
+                 String(req.targetInspectorId) === String(inspectorProfile.id);
         }
         return true;
       })

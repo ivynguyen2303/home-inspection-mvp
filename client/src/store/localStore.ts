@@ -92,7 +92,7 @@ export function useLocalStore() {
       console.error('Error loading from localStorage:', error);
     }
     
-    // Load initial data from example file
+    // Start with completely empty data
     return {
       requests: [],
       inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
@@ -113,15 +113,6 @@ export function useLocalStore() {
       inspectorProfile: DEFAULT_INSPECTOR_PROFILE,
       allInspectorProfiles: []
     });
-    
-    console.log('🧹 ALL DATA CLEARED!');
-    console.log('- User accounts: cleared');
-    console.log('- Sessions: cleared'); 
-    console.log('- Inspector profiles: cleared');
-    console.log('- Requests: cleared');
-    
-    // Force page refresh to show clean state
-    window.location.reload();
   };
 
   // Save to localStorage whenever store changes
