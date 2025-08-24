@@ -115,28 +115,40 @@ export function useLocalStore() {
     // Load shared requests (accessible to all users)
     let sharedRequests = [];
     try {
+      console.log('🔍 [STORAGE DEBUG] All localStorage keys:', Object.keys(localStorage));
+      console.log('🔍 [STORAGE DEBUG] Looking for key:', SHARED_REQUESTS_KEY);
+      
       const savedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
-      console.log('🏪 [STORE INIT] Raw shared requests from localStorage:', savedRequests);
+      console.log('🏪 [STORE INIT] Raw shared requests from localStorage:');
+      console.log('🏪 [STORE INIT] Length:', savedRequests?.length || 'null');
+      console.log('🏪 [STORE INIT] Content:', savedRequests);
       
       if (savedRequests) {
         const parsed = JSON.parse(savedRequests);
         console.log('🏪 [STORE INIT] Parsed shared requests:', parsed);
+        console.log('🏪 [STORE INIT] Parsed type:', typeof parsed);
+        console.log('🏪 [STORE INIT] Is array?', Array.isArray(parsed));
         
         // Only clear if we actually find the old problematic fields
-        const hasOldFormat = Array.isArray(parsed) && parsed.some((r: any) => 
-          r.hasOwnProperty('interestedInspectorIds') || r.hasOwnProperty('targetInspectorId')
-        );
+        const hasOldFormat = Array.isArray(parsed) && parsed.some((r: any) => {
+          const hasOldFields = r.hasOwnProperty('interestedInspectorIds') || r.hasOwnProperty('targetInspectorId');
+          console.log('🔍 [FORMAT CHECK] Request:', r.id, 'has old fields:', hasOldFields);
+          return hasOldFields;
+        });
+        
+        console.log('🔍 [FORMAT CHECK] Has old format?', hasOldFormat);
         
         if (hasOldFormat) {
-          console.log('🏪 [STORE INIT] Old request format detected, clearing');
+          console.log('🚨 [STORE INIT] Old request format detected, clearing');
           localStorage.removeItem(SHARED_REQUESTS_KEY);
           sharedRequests = [];
         } else {
           sharedRequests = Array.isArray(parsed) ? parsed : [];
-          console.log('🏪 [STORE INIT] Final shared requests loaded:', sharedRequests.length, 'requests');
+          console.log('✅ [STORE INIT] Final shared requests loaded:', sharedRequests.length, 'requests');
+          console.log('✅ [STORE INIT] Request IDs:', sharedRequests.map(r => r.id));
         }
       } else {
-        console.log('🏪 [STORE INIT] No shared requests found in localStorage');
+        console.log('❌ [STORE INIT] No shared requests found in localStorage');
       }
     } catch (error) {
       console.error('🏪 [STORE INIT] Error loading shared requests:', error);
