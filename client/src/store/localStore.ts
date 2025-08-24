@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { mockRequests } from '@/data/mockRequests';
 
 export interface Request {
   id: string;
@@ -70,15 +71,8 @@ export function useLocalStore() {
 
   // Load example requests on first run
   useEffect(() => {
-    if (store.requests.length === 0) {
-      fetch('/src/data/requests.example.json')
-        .then(response => response.json())
-        .then(data => {
-          if (data.requests) {
-            setStore(prev => ({ ...prev, requests: data.requests }));
-          }
-        })
-        .catch(error => console.error('Error loading example requests:', error));
+    if (store.requests.length === 0 && mockRequests.length > 0) {
+      setStore(prev => ({ ...prev, requests: mockRequests }));
     }
   }, [store.requests.length]);
 
