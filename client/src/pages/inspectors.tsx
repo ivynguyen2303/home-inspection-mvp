@@ -52,6 +52,7 @@ export default function Inspectors() {
     } else {
       // For real accounts, ONLY show real inspector profiles (no mock data)
       console.log('Real account - showing only real profiles:', realProfiles.length);
+      console.log('User email:', user?.email, 'Is demo?', isDemoAccount);
       // Clear any mock data that might have persisted from localStorage
       clearMockDataForRealAccounts();
       setInspectors(realProfiles);

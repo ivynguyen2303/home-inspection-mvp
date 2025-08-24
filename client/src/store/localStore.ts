@@ -105,10 +105,19 @@ export function useLocalStore() {
         (profile: InspectorProfile) => !mockInspectorIds.includes(profile.id)
       );
       
+      // Also clean up mock requests that might have inspector IDs from mock data
+      const cleanRequests = stored.requests ? stored.requests.filter((req: any) => {
+        // Remove requests that reference mock inspectors
+        if (req.interestedInspectorIds && req.interestedInspectorIds.some((id: string) => mockInspectorIds.includes(id))) {
+          return false;
+        }
+        return true;
+      }) : [];
+      
       const cleanedStore = {
         ...stored,
         allInspectorProfiles: cleanProfiles,
-        requests: stored.requests || []
+        requests: cleanRequests
       };
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedStore));
@@ -116,12 +125,12 @@ export function useLocalStore() {
     }
   };
 
-  // Load example requests only for demo accounts or if no real requests exist
-  useEffect(() => {
+  // Load mock requests conditionally - we'll let components decide when to load them
+  const loadMockRequestsForDemo = () => {
     if (store.requests.length === 0 && mockRequests.length > 0) {
       setStore(prev => ({ ...prev, requests: mockRequests }));
     }
-  }, [store.requests.length]);
+  };
 
   // Save to localStorage whenever store changes
   useEffect(() => {
@@ -229,6 +238,7 @@ export function useLocalStore() {
     getInspectorProfileById,
     getRequestById,
     getMyInterests,
-    clearMockDataForRealAccounts
+    clearMockDataForRealAccounts,
+    loadMockRequestsForDemo
   };
 }
