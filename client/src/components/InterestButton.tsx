@@ -36,8 +36,9 @@ export function InterestButton({ requestId, interestCount, className }: Interest
         <span>{isInterested ? 'Interested' : 'I\'m Interested'}</span>
       </Button>
       {interestCount > 0 && (
-        <Badge variant="secondary" className="bg-red-100 text-red-800" data-testid={`badge-interest-count-${requestId}`}>
-          {interestCount} ❤
+        <Badge variant="secondary" className="bg-red-100 text-red-800 flex items-center gap-1 whitespace-nowrap" data-testid={`badge-interest-count-${requestId}`}>
+          <span>{interestCount}</span>
+          <span>❤</span>
         </Badge>
       )}
     </div>
