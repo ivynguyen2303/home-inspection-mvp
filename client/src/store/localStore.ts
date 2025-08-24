@@ -248,8 +248,16 @@ export function useLocalStore() {
       const currentData = localStorage.getItem(STORAGE_KEY);
       const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
       
+      console.log('removeInspectorProfile - All profile IDs:', parsed.allInspectorProfiles.map((p: InspectorProfile) => p.id));
+      console.log('removeInspectorProfile - Looking for userId:', userId);
+      
       // Remove the inspector profile
-      const updatedProfiles = parsed.allInspectorProfiles.filter((profile: InspectorProfile) => profile.id !== userId);
+      const updatedProfiles = parsed.allInspectorProfiles.filter((profile: InspectorProfile) => {
+        const shouldKeep = profile.id !== userId;
+        console.log(`removeInspectorProfile - Profile ${profile.id}: ${shouldKeep ? 'KEEP' : 'REMOVE'}`);
+        return shouldKeep;
+      });
+      
       console.log('removeInspectorProfile - Profiles before:', parsed.allInspectorProfiles.length);
       console.log('removeInspectorProfile - Profiles after:', updatedProfiles.length);
       
@@ -264,6 +272,11 @@ export function useLocalStore() {
       // Force React to re-read from localStorage
       setStore(updatedData);
       console.log('removeInspectorProfile - Forced store update');
+      
+      // Trigger storage event to refresh the inspectors page
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage'));
+      }, 100);
       
     } catch (error) {
       console.error('removeInspectorProfile - localStorage backup failed:', error);
