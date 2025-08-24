@@ -1,0 +1,81 @@
+{
+  "requests": [
+    {
+      "id": "req_0001",
+      "createdAt": "2025-08-23T10:00:00Z",
+      "status": "open",
+      "client": {
+        "name": "Jordan Smith",
+        "email": "jordan@example.com",
+        "phone": "(555) 111-2222"
+      },
+      "property": {
+        "address": "123 Main St",
+        "cityZip": "Irvine, 92617",
+        "type": "House",
+        "beds": 3,
+        "baths": 2,
+        "sqft": 1650
+      },
+      "schedule": {
+        "preferredDate": "2025-08-26",
+        "altDate": "2025-08-27"
+      },
+      "budget": 400,
+      "notes": "Need fast turnaround on report for closing deadline.",
+      "interestCount": 2,
+      "interestedInspectorIds": ["demo_inspector_1"]
+    },
+    {
+      "id": "req_0002", 
+      "createdAt": "2025-08-22T15:30:00Z",
+      "status": "open",
+      "client": {
+        "name": "Sarah Chen",
+        "email": "sarah.chen@example.com",
+        "phone": "(555) 222-3333"
+      },
+      "property": {
+        "address": "456 Oak Ave",
+        "cityZip": "Tustin, 92780",
+        "type": "Townhome",
+        "beds": 2,
+        "baths": 2,
+        "sqft": 1200
+      },
+      "schedule": {
+        "preferredDate": "2025-08-25"
+      },
+      "budget": 375,
+      "notes": "First-time buyer, would appreciate detailed explanations.",
+      "interestCount": 1,
+      "interestedInspectorIds": []
+    },
+    {
+      "id": "req_0003",
+      "createdAt": "2025-08-24T09:15:00Z", 
+      "status": "open",
+      "client": {
+        "name": "Mike Rodriguez",
+        "email": "mike.r@example.com",
+        "phone": "(555) 333-4444"
+      },
+      "property": {
+        "address": "789 Pine Dr",
+        "cityZip": "Newport Beach, 92660",
+        "type": "Condo",
+        "beds": 1,
+        "baths": 1,
+        "sqft": 850
+      },
+      "schedule": {
+        "preferredDate": "2025-08-28",
+        "altDate": "2025-08-29"
+      },
+      "budget": 325,
+      "notes": "Older building, concerned about plumbing and electrical systems.",
+      "interestCount": 0,
+      "interestedInspectorIds": []
+    }
+  ]
+}

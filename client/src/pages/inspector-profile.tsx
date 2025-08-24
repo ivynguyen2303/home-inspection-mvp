@@ -43,18 +43,18 @@ interface Inspector {
 }
 
 export default function InspectorProfile() {
-  const [match] = useRoute("/inspectors/:id");
+  const [match, params] = useRoute("/inspectors/:id");
   const [inspector, setInspector] = useState<Inspector | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!match?.id) return;
+    if (!match || !params?.id) return;
 
     // Load inspector data from JSON file
     fetch("/src/data/inspectors.json")
       .then(response => response.json())
       .then(data => {
-        const foundInspector = data.inspectors.find((insp: Inspector) => insp.id === match.id);
+        const foundInspector = data.inspectors.find((insp: Inspector) => insp.id === params.id);
         setInspector(foundInspector || null);
         setLoading(false);
       })
@@ -62,7 +62,7 @@ export default function InspectorProfile() {
         console.error("Error loading inspector data:", error);
         setLoading(false);
       });
-  }, [match?.id]);
+  }, [match, params?.id]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
