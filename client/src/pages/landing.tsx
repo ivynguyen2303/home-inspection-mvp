@@ -110,7 +110,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4" data-testid="text-features-title">
-              Why Choose InspectNow?
+              Why Choose Lumina?
             </h2>
             <p className="text-xl text-muted max-w-2xl mx-auto" data-testid="text-features-subtitle">
               Professional home inspection services you can trust

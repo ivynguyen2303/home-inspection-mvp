@@ -183,7 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       toast({
         title: "Account Created!",
-        description: `Welcome to InspectNow, ${user.name || user.email}!`,
+        description: `Welcome to Lumina, ${user.name || user.email}!`,
       });
 
       // Redirect based on role

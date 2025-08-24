@@ -80,11 +80,11 @@ export default function Signup() {
           <Link href="/">
             <h1 className="text-3xl font-bold text-primary flex items-center justify-center mb-2">
               <MapPin className="mr-2 h-8 w-8" />
-              InspectNow
+              Lumina
             </h1>
           </Link>
           <h2 className="text-2xl font-bold text-secondary">Create your account</h2>
-          <p className="text-muted">Join the InspectNow community</p>
+          <p className="text-muted">Join the Lumina community</p>
         </div>
 
         {/* Signup Form */}

@@ -70,7 +70,7 @@ export default function Thanks() {
 
             <div className="mt-8 pt-8 border-t border-gray-200">
               <p className="text-sm text-muted" data-testid="text-demo-note">
-                <strong>Demo Note:</strong> This is a demonstration of the InspectNow platform. 
+                <strong>Demo Note:</strong> This is a demonstration of the Lumina platform. 
                 In a real application, inspectors would receive notifications and contact you directly.
               </p>
             </div>

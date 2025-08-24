@@ -18,7 +18,7 @@ export function Header() {
               <Link href="/" data-testid="link-home">
                 <h1 className="text-2xl font-bold text-primary flex items-center">
                   <MapPin className="mr-2 h-6 w-6" />
-                  InspectNow
+                  Lumina
                 </h1>
               </Link>
             </div>

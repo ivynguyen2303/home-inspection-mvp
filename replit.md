@@ -1,6 +1,6 @@
 # Overview
 
-This is a fully functional home inspector marketplace web application called "InspectNow" that connects users with licensed home inspectors. The application features dual functionality: a client-facing directory for finding inspectors and an inspector-facing dashboard for managing requests. The system includes complete authentication with user roles (client/inspector), protected routes, and a live system where inspector signups immediately appear in the client directory. Users can create accounts, inspectors can manage profiles, and the platform facilitates real connections between clients and inspectors.
+This is a fully functional home inspector marketplace web application called "Lumina" that connects users with licensed home inspectors. The application features dual functionality: a client-facing directory for finding inspectors and an inspector-facing dashboard for managing requests. The system includes complete authentication with user roles (client/inspector), protected routes, and a live system where inspector signups immediately appear in the client directory. Users can create accounts, inspectors can manage profiles, and the platform facilitates real connections between clients and inspectors.
 
 # User Preferences
 
