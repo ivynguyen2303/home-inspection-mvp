@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Link } from 'wouter';
 import { Header } from '@/components/header';
 import { ProfileEditor } from '@/components/ProfileEditor';
+import { AvailabilityManager } from '@/components/AvailabilityManager';
 import { RequestCard } from '@/components/RequestCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useLocalStore } from '@/store/localStore';
-import { LayoutDashboard, Heart, Settings, Plus, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Heart, Settings, Plus, Briefcase, Calendar } from 'lucide-react';
 
 export default function InspectorDashboard() {
   const { requests, getMyInterests, inspectorProfile } = useLocalStore();
@@ -90,7 +91,7 @@ export default function InspectorDashboard() {
 
         {/* Main Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="requests" data-testid="tab-open-requests">
               <Briefcase className="mr-2 h-4 w-4" />
               Open Requests
@@ -98,6 +99,10 @@ export default function InspectorDashboard() {
             <TabsTrigger value="interests" data-testid="tab-my-interests">
               <Heart className="mr-2 h-4 w-4" />
               My Interests
+            </TabsTrigger>
+            <TabsTrigger value="availability" data-testid="tab-availability">
+              <Calendar className="mr-2 h-4 w-4" />
+              Availability
             </TabsTrigger>
             <TabsTrigger value="profile" data-testid="tab-profile">
               <Settings className="mr-2 h-4 w-4" />
@@ -168,6 +173,13 @@ export default function InspectorDashboard() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="availability" className="space-y-6">
+            <h2 className="text-2xl font-semibold text-secondary">Manage Your Availability</h2>
+            <div className="max-w-4xl">
+              <AvailabilityManager />
+            </div>
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
