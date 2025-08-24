@@ -87,33 +87,17 @@ export function useLocalStore() {
       if (saved) {
         const parsed = JSON.parse(saved);
         
-        // Migrate old incompatible data format without losing valid data
-        let needsMigration = false;
-        
-        // Fix inspector profile if needed
-        if (parsed.inspectorProfile?.id && !parsed.inspectorProfile.email) {
-          needsMigration = true;
-          parsed.inspectorProfile = DEFAULT_INSPECTOR_PROFILE;
+        // Clear old incompatible data format
+        if (parsed.inspectorProfile?.id || 
+            parsed.requests?.some((r: any) => r.interestedInspectorIds) ||
+            parsed.requests?.some((r: any) => r.targetInspectorId)) {
+          console.log('Old data format detected, clearing for fresh start');
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem('inspect_now_users');
+          localStorage.removeItem('inspect_now_session');
+        } else {
+          return parsed;
         }
-        
-        // Fix requests if needed - filter out old format, keep new format
-        if (parsed.requests) {
-          const migratedRequests = parsed.requests.filter((r: any) => 
-            r.interestedInspectorEmails && !r.interestedInspectorIds &&
-            (!r.targetInspectorId || r.targetInspectorEmail)
-          );
-          if (migratedRequests.length !== parsed.requests.length) {
-            needsMigration = true;
-            parsed.requests = migratedRequests;
-          }
-        }
-        
-        if (needsMigration) {
-          console.log('Migrated data to new format, keeping valid requests');
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-        }
-        
-        return parsed;
       }
     } catch (error) {
       console.error('Error loading from localStorage:', error);
@@ -152,11 +136,9 @@ export function useLocalStore() {
   }, [store]);
 
   const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorEmails'>) => {
-    // Use email-based identification: client email + timestamp for uniqueness  
-    const requestId = `${requestData.client.email}_${Date.now()}`;
     const newRequest: Request = {
       ...requestData,
-      id: requestId,
+      id: `req_${Date.now()}`,
       createdAt: new Date().toISOString(),
       interestCount: 0,
       interestedInspectorEmails: []
@@ -341,7 +323,7 @@ export function useLocalStore() {
   // Create booking request from time slot
   const createBookingFromTimeSlot = (
     timeSlotId: string,
-    inspectorEmail: string,
+    inspectorId: string,
     clientData: {
       name: string;
       email: string;
@@ -356,22 +338,21 @@ export function useLocalStore() {
     }
   ) => {
     // Find the inspector and time slot
-    const inspector = getInspectorProfileByEmail(inspectorEmail);
+    const inspector = getInspectorProfileByEmail(inspectorId);
     const timeSlot = inspector?.availability?.timeSlots?.find((slot: any) => slot.id === timeSlotId);
     
     if (!inspector || !timeSlot) {
       throw new Error('Inspector or time slot not found');
     }
 
-    // Use email-based identification for the booking request
-    const requestId = `${clientData.email}_booking_${Date.now()}`;
+
     // Create the request
     const newRequest: Request = {
-      id: requestId,
+      id: `req_${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'open',
       type: 'client_request',
-      targetInspectorEmail: inspectorEmail,
+      targetInspectorEmail: inspectorId,
       client: {
         name: clientData.name,
         email: clientData.email,
@@ -390,7 +371,7 @@ export function useLocalStore() {
       },
       notes: clientData.notes || `Booking request for ${timeSlot.date} ${timeSlot.startTime}-${timeSlot.endTime}`,
       interestCount: 1,
-      interestedInspectorEmails: [inspectorEmail]
+      interestedInspectorEmails: [inspectorId]
     };
 
     // Add the request
@@ -403,7 +384,7 @@ export function useLocalStore() {
     setStore(prev => ({
       ...prev,
       allInspectorProfiles: prev.allInspectorProfiles.map(profile => {
-        if (profile.email === inspectorEmail && profile.availability?.timeSlots) {
+        if (profile.email === inspectorId && profile.availability?.timeSlots) {
           return {
             ...profile,
             availability: {
