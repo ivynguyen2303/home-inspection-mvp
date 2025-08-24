@@ -60,6 +60,7 @@ export default function PostRequest() {
     try {
       const requestId = addRequest({
         status: 'open',
+        type: 'open_request', // This is an open request visible to all inspectors
         client: {
           name: data.clientName,
           email: data.clientEmail,

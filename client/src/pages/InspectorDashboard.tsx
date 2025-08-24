@@ -15,10 +15,10 @@ export default function InspectorDashboard() {
   const [activeTab, setActiveTab] = useState('requests');
   
   const openRequests = requests.filter(req => 
-    req.status === 'open' && (
-      req.type === 'open_request' || 
-      (req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id)
-    )
+    req.status === 'open' && req.type === 'open_request'
+  );
+  const clientRequests = requests.filter(req => 
+    req.status === 'open' && req.type === 'client_request' && req.targetInspectorId === inspectorProfile.id
   );
   const myInterests = getMyInterests();
 
@@ -39,7 +39,7 @@ export default function InspectorDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
             <CardContent className="p-6 text-center">
               <Briefcase className="mx-auto h-8 w-8 text-primary mb-3" />
@@ -52,6 +52,25 @@ export default function InspectorDashboard() {
                   View All
                 </Button>
               </Link>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+            <CardContent className="p-6 text-center">
+              <Calendar className="mx-auto h-8 w-8 text-blue-500 mb-3" />
+              <h3 className="font-semibold text-secondary mb-2">Client Requests</h3>
+              <p className="text-2xl font-bold text-blue-500" data-testid="text-client-requests-count">
+                {clientRequests.length}
+              </p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="mt-2"
+                onClick={() => setActiveTab('client-requests')}
+                data-testid="button-view-client-requests"
+              >
+                View Details
+              </Button>
             </CardContent>
           </Card>
           
@@ -96,10 +115,14 @@ export default function InspectorDashboard() {
 
         {/* Main Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="requests" data-testid="tab-open-requests">
               <Briefcase className="mr-2 h-4 w-4" />
               Open Requests
+            </TabsTrigger>
+            <TabsTrigger value="client-requests" data-testid="tab-client-requests">
+              <Calendar className="mr-2 h-4 w-4" />
+              Client Requests
             </TabsTrigger>
             <TabsTrigger value="interests" data-testid="tab-my-interests">
               <Heart className="mr-2 h-4 w-4" />
@@ -144,6 +167,37 @@ export default function InspectorDashboard() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {openRequests.slice(0, 6).map((request) => (
+                  <RequestCard key={request.id} request={request} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="client-requests" className="space-y-6">
+            <h2 className="text-2xl font-semibold text-secondary">Client Requests for Me</h2>
+            
+            {clientRequests.length === 0 ? (
+              <Card className="bg-white rounded-xl shadow-lg">
+                <CardContent className="p-12 text-center">
+                  <Calendar className="mx-auto h-12 w-12 text-muted mb-4" />
+                  <h3 className="text-lg font-semibold text-secondary mb-2" data-testid="text-no-client-requests">
+                    No client requests yet
+                  </h3>
+                  <p className="text-muted mb-4">
+                    Clients can book your available time slots directly. Make sure your availability is up to date.
+                  </p>
+                  <Button 
+                    onClick={() => setActiveTab('availability')}
+                    data-testid="button-manage-availability"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Manage Availability
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {clientRequests.map((request) => (
                   <RequestCard key={request.id} request={request} />
                 ))}
               </div>
