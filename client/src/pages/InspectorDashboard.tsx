@@ -28,6 +28,20 @@ export default function InspectorDashboard() {
                           inspectorProfile.id && 
                           String(req.targetInspectorId) === String(inspectorProfile.id);
     
+    // Debug client request filtering
+    if (isClientRequest) {
+      console.log('Inspector Dashboard - Client request filtering:', {
+        requestId: req.id,
+        type: req.type,
+        status: req.status,
+        targetInspectorId: req.targetInspectorId,
+        currentInspectorId: inspectorProfile.id,
+        isOpen,
+        isClientRequest,
+        isTargetedToMe,
+        shouldShow: isOpen && isClientRequest && isTargetedToMe
+      });
+    }
     
     return isOpen && isClientRequest && isTargetedToMe;
   });
