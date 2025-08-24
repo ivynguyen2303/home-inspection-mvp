@@ -102,6 +102,7 @@ export function useLocalStore() {
 
   // Clear all data function
   const clearAllData = () => {
+    console.log('clearAllData called - clearing localStorage and store');
     localStorage.removeItem(STORAGE_KEY);
     setStore({
       requests: [],
@@ -113,6 +114,7 @@ export function useLocalStore() {
   // Save to localStorage whenever store changes
   useEffect(() => {
     try {
+      console.log('Saving to localStorage:', store);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
     } catch (error) {
       console.error('Error saving to localStorage:', error);
@@ -120,6 +122,7 @@ export function useLocalStore() {
   }, [store]);
 
   const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorIds'>) => {
+    console.log('addRequest called with:', requestData);
     const newRequest: Request = {
       ...requestData,
       id: `req_${Date.now()}`,
@@ -127,12 +130,18 @@ export function useLocalStore() {
       interestCount: 0,
       interestedInspectorIds: []
     };
+    console.log('Created new request:', newRequest);
     
-    setStore(prev => ({
-      ...prev,
-      requests: [newRequest, ...prev.requests]
-    }));
+    setStore(prev => {
+      const updated = {
+        ...prev,
+        requests: [newRequest, ...prev.requests]
+      };
+      console.log('Updated store requests:', updated.requests);
+      return updated;
+    });
     
+    console.log('Final store after addRequest:', store);
     return newRequest.id;
   };
 
