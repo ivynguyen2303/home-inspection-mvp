@@ -42,9 +42,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const initAuth = () => {
       try {
-        // Clear all existing data for fresh start
-        clearAllUsers();
-        
         const session = getSession();
         if (session) {
           const user = findUserById(session.userId);

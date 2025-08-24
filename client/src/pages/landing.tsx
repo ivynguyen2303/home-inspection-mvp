@@ -11,25 +11,29 @@ export default function Landing() {
   const [searchLocation, setSearchLocation] = useState("");
   const { clearAllData } = useLocalStore();
 
-  // Clear all existing data on first load to ensure fresh start
+  // Only clear data on first app initialization (one-time setup)
   useEffect(() => {
-    // Clear all possible data keys
-    const keysToRemove = [
-      'inspect_now_data',
-      'inspect_now_auth', 
-      'inspect_now_user',
-      'inspect_now_users',
-      'inspect_now_session',
-      'inspect_now_inspector_profile',
-      'inspect_now_all_inspector_profiles',
-      'inspect_now_requests'
-    ];
-    
-    keysToRemove.forEach(key => {
-      localStorage.removeItem(key);
-    });
-    
-    clearAllData();
+    const hasInitialized = localStorage.getItem('app_initialized');
+    if (!hasInitialized) {
+      // First time setup - clear any old data
+      const keysToRemove = [
+        'inspect_now_data',
+        'inspect_now_auth', 
+        'inspect_now_user',
+        'inspect_now_users',
+        'inspect_now_session',
+        'inspect_now_inspector_profile',
+        'inspect_now_all_inspector_profiles',
+        'inspect_now_requests'
+      ];
+      
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+      });
+      
+      clearAllData();
+      localStorage.setItem('app_initialized', 'true');
+    }
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
