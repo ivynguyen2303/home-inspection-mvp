@@ -67,7 +67,11 @@ export default function PostRequest() {
   }, [user, form]);
 
   const onSubmit = (data: RequestFormData) => {
+    console.log('📝 [POST REQUEST] Form submitted');
+    console.log('📝 [POST REQUEST] Form data:', data);
+    
     try {
+      console.log('📝 [POST REQUEST] Calling addRequest with data');
       const requestId = addRequest({
         status: 'open',
         type: 'open_request', // This is an open request visible to all inspectors
@@ -92,6 +96,17 @@ export default function PostRequest() {
         notes: data.notes || ''
       });
 
+      console.log('📝 [POST REQUEST] Request created with ID:', requestId);
+      console.log('📝 [POST REQUEST] Checking localStorage after creation...');
+      
+      // Debug localStorage state
+      const sharedRequests = localStorage.getItem('inspect_now_shared_requests');
+      console.log('📝 [POST REQUEST] SharedRequests in localStorage:', sharedRequests);
+      if (sharedRequests) {
+        const parsed = JSON.parse(sharedRequests);
+        console.log('📝 [POST REQUEST] Parsed requests count:', parsed.length);
+      }
+
       toast({
         title: "Request Posted!",
         description: "Your inspection request has been posted successfully.",
@@ -99,6 +114,7 @@ export default function PostRequest() {
 
       setLocation('/thanks');
     } catch (error) {
+      console.error('📝 [POST REQUEST] Error creating request:', error);
       toast({
         title: "Error",
         description: "Failed to post request. Please try again.",

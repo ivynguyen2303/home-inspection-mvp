@@ -16,12 +16,19 @@ export default function InspectorDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('requests');
   
-  
+  console.log('🏠 [INSPECTOR DASHBOARD] Component rendered');
+  console.log('🏠 [INSPECTOR DASHBOARD] Total requests from store:', requests.length);
+  console.log('🏠 [INSPECTOR DASHBOARD] All requests:', requests);
+  console.log('🏠 [INSPECTOR DASHBOARD] Inspector profile:', inspectorProfile);
+  console.log('🏠 [INSPECTOR DASHBOARD] Current user:', user);
   
   // Filter requests for this inspector only
   const openRequests = requests.filter(req => 
     req.status === 'open' && req.type === 'open_request'
   );
+  
+  console.log('🏠 [INSPECTOR DASHBOARD] Open requests filtered:', openRequests.length);
+  console.log('🏠 [INSPECTOR DASHBOARD] Open requests:', openRequests);
   
   // IMPORTANT: Client requests should ONLY show for the targeted inspector
   const clientRequests = requests.filter(req => {
@@ -32,10 +39,26 @@ export default function InspectorDashboard() {
                           inspectorProfile.email && 
                           String(req.targetInspectorEmail) === String(inspectorProfile.email);
     
+    console.log('🏠 [INSPECTOR DASHBOARD] Checking client request:', {
+      requestId: req.id,
+      status: req.status,
+      type: req.type,
+      targetInspectorEmail: req.targetInspectorEmail,
+      myEmail: inspectorProfile.email,
+      isOpen,
+      isClientRequest,
+      isTargetedToMe,
+      finalMatch: isOpen && isClientRequest && isTargetedToMe
+    });
     
     return isOpen && isClientRequest && isTargetedToMe;
   });
+  
+  console.log('🏠 [INSPECTOR DASHBOARD] Client requests filtered:', clientRequests.length);
+  console.log('🏠 [INSPECTOR DASHBOARD] Client requests:', clientRequests);
+  
   const myInterests = getMyInterests();
+  console.log('🏠 [INSPECTOR DASHBOARD] My interests:', myInterests.length);
 
   return (
     <div className="min-h-screen bg-gray-50">

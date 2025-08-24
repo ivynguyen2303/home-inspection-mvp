@@ -107,47 +107,100 @@ export function useLocalStore() {
     const userEmail = getCurrentUserEmail();
     const userStorageKey = getUserStorageKey(userEmail);
     
+    console.log('🏪 [STORE INIT] Starting store initialization');
+    console.log('🏪 [STORE INIT] Current user email:', userEmail);
+    console.log('🏪 [STORE INIT] User storage key:', userStorageKey);
+    console.log('🏪 [STORE INIT] Shared requests key:', SHARED_REQUESTS_KEY);
+    
     // Load shared requests (accessible to all users)
     let sharedRequests = [];
     try {
       const savedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      console.log('🏪 [STORE INIT] Raw shared requests from localStorage:', savedRequests);
+      
       if (savedRequests) {
         const parsed = JSON.parse(savedRequests);
+        console.log('🏪 [STORE INIT] Parsed shared requests:', parsed);
+        
         // Clear old incompatible data format
         if (parsed.some && parsed.some((r: any) => r.interestedInspectorIds || r.targetInspectorId)) {
-          console.log('Old request format detected, clearing');
+          console.log('🏪 [STORE INIT] Old request format detected, clearing');
           localStorage.removeItem(SHARED_REQUESTS_KEY);
         } else {
           sharedRequests = Array.isArray(parsed) ? parsed : [];
+          console.log('🏪 [STORE INIT] Final shared requests loaded:', sharedRequests.length, 'requests');
         }
+      } else {
+        console.log('🏪 [STORE INIT] No shared requests found in localStorage');
       }
     } catch (error) {
-      console.error('Error loading shared requests:', error);
+      console.error('🏪 [STORE INIT] Error loading shared requests:', error);
     }
     
     // Load user-specific data (profiles)
     let userProfiles = { inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
     try {
       const savedUserData = localStorage.getItem(userStorageKey);
+      console.log('🏪 [STORE INIT] Raw user data from localStorage:', savedUserData);
+      
       if (savedUserData) {
         const parsed = JSON.parse(savedUserData);
+        console.log('🏪 [STORE INIT] Parsed user data:', parsed);
+        
         if (parsed.inspectorProfile && parsed.allInspectorProfiles) {
           userProfiles = {
             inspectorProfile: parsed.inspectorProfile,
             allInspectorProfiles: parsed.allInspectorProfiles
           };
+          console.log('🏪 [STORE INIT] User profiles loaded successfully');
         }
+      } else {
+        console.log('🏪 [STORE INIT] No user data found, using defaults');
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('🏪 [STORE INIT] Error loading user data:', error);
     }
     
-    return {
+    const initialStore = {
       requests: sharedRequests,
       inspectorProfile: userProfiles.inspectorProfile,
       allInspectorProfiles: userProfiles.allInspectorProfiles
     };
+    
+    console.log('🏪 [STORE INIT] Final initial store:', initialStore);
+    console.log('🏪 [STORE INIT] Requests count:', sharedRequests.length);
+    
+    return initialStore;
   });
+
+  // Debug function to inspect localStorage
+  const debugLocalStorage = () => {
+    console.log('🔍 [DEBUG STORAGE] === LocalStorage Debug ===');
+    console.log('🔍 [DEBUG STORAGE] All localStorage keys:', Object.keys(localStorage));
+    console.log('🔍 [DEBUG STORAGE] SHARED_REQUESTS_KEY:', SHARED_REQUESTS_KEY);
+    
+    const sharedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+    console.log('🔍 [DEBUG STORAGE] Shared requests raw:', sharedRequests);
+    if (sharedRequests) {
+      try {
+        const parsed = JSON.parse(sharedRequests);
+        console.log('🔍 [DEBUG STORAGE] Shared requests parsed:', parsed);
+        console.log('🔍 [DEBUG STORAGE] Shared requests count:', parsed.length);
+      } catch (e) {
+        console.log('🔍 [DEBUG STORAGE] Error parsing shared requests:', e);
+      }
+    }
+    
+    const userEmail = getCurrentUserEmail();
+    const userStorageKey = getUserStorageKey(userEmail);
+    console.log('🔍 [DEBUG STORAGE] User storage key:', userStorageKey);
+    
+    const userData = localStorage.getItem(userStorageKey);
+    console.log('🔍 [DEBUG STORAGE] User data raw:', userData);
+    
+    console.log('🔍 [DEBUG STORAGE] Current store state:', store);
+    console.log('🔍 [DEBUG STORAGE] === End Debug ===');
+  };
 
   // Clear all data function
   const clearAllData = () => {
@@ -172,22 +225,42 @@ export function useLocalStore() {
     const userEmail = getCurrentUserEmail();
     const userStorageKey = getUserStorageKey(userEmail);
     
+    console.log('💾 [STORE SAVE] Store changed, saving to localStorage');
+    console.log('💾 [STORE SAVE] Current store:', store);
+    console.log('💾 [STORE SAVE] Requests to save:', store.requests.length);
+    
     try {
       // Save shared requests (accessible to all users)
-      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(store.requests));
+      const requestsJson = JSON.stringify(store.requests);
+      localStorage.setItem(SHARED_REQUESTS_KEY, requestsJson);
+      console.log('💾 [STORE SAVE] Saved shared requests to:', SHARED_REQUESTS_KEY);
+      console.log('💾 [STORE SAVE] Requests JSON length:', requestsJson.length);
       
       // Save user-specific data (profiles only)
       const userData = {
         inspectorProfile: store.inspectorProfile,
         allInspectorProfiles: store.allInspectorProfiles
       };
-      localStorage.setItem(userStorageKey, JSON.stringify(userData));
+      const userDataJson = JSON.stringify(userData);
+      localStorage.setItem(userStorageKey, userDataJson);
+      console.log('💾 [STORE SAVE] Saved user data to:', userStorageKey);
+      
+      // Verify the save worked
+      const verification = localStorage.getItem(SHARED_REQUESTS_KEY);
+      console.log('💾 [STORE SAVE] Verification - Can we read back requests?', verification ? 'YES' : 'NO');
+      if (verification) {
+        const verificationParsed = JSON.parse(verification);
+        console.log('💾 [STORE SAVE] Verification - Parsed requests count:', verificationParsed.length);
+      }
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('💾 [STORE SAVE] Error saving to localStorage:', error);
     }
   }, [store]);
 
   const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorEmails'>) => {
+    console.log('➕ [ADD REQUEST] Starting to add new request');
+    console.log('➕ [ADD REQUEST] Request data:', requestData);
+    
     const newRequest: Request = {
       ...requestData,
       id: `req_${Date.now()}`,
@@ -196,19 +269,39 @@ export function useLocalStore() {
       interestedInspectorEmails: []
     };
     
+    console.log('➕ [ADD REQUEST] New request created:', newRequest);
+    
     // Update shared requests directly
     try {
       const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      console.log('➕ [ADD REQUEST] Current requests in localStorage:', currentRequests);
+      
       const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      console.log('➕ [ADD REQUEST] Existing requests count:', existingRequests.length);
+      
       const updatedRequests = [newRequest, ...existingRequests];
-      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
+      console.log('➕ [ADD REQUEST] Updated requests count:', updatedRequests.length);
+      
+      const requestsJson = JSON.stringify(updatedRequests);
+      localStorage.setItem(SHARED_REQUESTS_KEY, requestsJson);
+      console.log('➕ [ADD REQUEST] Saved to localStorage, JSON length:', requestsJson.length);
+      
+      // Verify save
+      const verification = localStorage.getItem(SHARED_REQUESTS_KEY);
+      console.log('➕ [ADD REQUEST] Verification save successful:', verification ? 'YES' : 'NO');
       
       // Update state
-      setStore(prev => ({
-        ...prev,
-        requests: updatedRequests
-      }));
+      setStore(prev => {
+        console.log('➕ [ADD REQUEST] Updating store state from:', prev.requests.length, 'to:', updatedRequests.length);
+        return {
+          ...prev,
+          requests: updatedRequests
+        };
+      });
+      
+      console.log('➕ [ADD REQUEST] Request added successfully with ID:', newRequest.id);
     } catch (error) {
+      console.error('➕ [ADD REQUEST] Error during localStorage save:', error);
       // Fallback to regular state update if localStorage fails
       setStore(prev => ({
         ...prev,
@@ -588,6 +681,7 @@ export function useLocalStore() {
     createOpenRequest,
     getClientRequests,
     updateRequest,
-    deleteRequest
+    deleteRequest,
+    debugLocalStorage
   };
 }
