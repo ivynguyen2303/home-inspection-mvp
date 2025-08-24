@@ -111,35 +111,25 @@ export function useLocalStore() {
     // Load shared requests (accessible to all users)
     let sharedRequests = [];
     try {
-      console.log('🔍 [INIT DEBUG] Loading shared requests...');
       const savedRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
-      console.log('🔍 [INIT DEBUG] Raw localStorage data:', savedRequests?.substring(0, 200) + '...');
       
       if (savedRequests) {
         const parsed = JSON.parse(savedRequests);
-        console.log('🔍 [INIT DEBUG] Parsed requests:', parsed.length, 'total');
-        console.log('🔍 [INIT DEBUG] Request IDs:', parsed.map((r: any) => r.id));
         
         // Only clear if we actually find the old problematic fields
         const hasOldFormat = Array.isArray(parsed) && parsed.some((r: any) => 
           r.hasOwnProperty('interestedInspectorIds') || r.hasOwnProperty('targetInspectorId')
         );
         
-        console.log('🔍 [INIT DEBUG] Has old format?', hasOldFormat);
-        
         if (hasOldFormat) {
-          console.log('🚨 [INIT DEBUG] Clearing old format data');
           localStorage.removeItem(SHARED_REQUESTS_KEY);
           sharedRequests = [];
         } else {
           sharedRequests = Array.isArray(parsed) ? parsed : [];
-          console.log('✅ [INIT DEBUG] Loaded', sharedRequests.length, 'shared requests');
         }
-      } else {
-        console.log('❌ [INIT DEBUG] No shared requests found in localStorage');
       }
     } catch (error) {
-      console.error('🏪 [STORE INIT] Error loading shared requests:', error);
+      console.error('Error loading shared requests:', error);
     }
     
     // Load user-specific data (profiles)
@@ -476,22 +466,19 @@ export function useLocalStore() {
     };
 
     // Add the request using shared storage (same method as open requests)
-    console.log('📋 [CLIENT BOOKING] Creating client request:', newRequest);
     try {
       const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
       const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
       const updatedRequests = [newRequest, ...existingRequests];
       localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
-      console.log('📋 [CLIENT BOOKING] Saved to localStorage, total requests:', updatedRequests.length);
       
       // Update state
       setStore(prev => ({
         ...prev,
         requests: updatedRequests
       }));
-      console.log('📋 [CLIENT BOOKING] Client request created successfully with ID:', newRequest.id);
     } catch (error) {
-      console.error('📋 [CLIENT BOOKING] Error saving client request:', error);
+      console.error('Error saving client request:', error);
       // Fallback to regular state update
       setStore(prev => ({
         ...prev,
@@ -576,30 +563,11 @@ export function useLocalStore() {
 
   // Get requests created by a specific client (by email)
   const getClientRequests = (clientEmail: string) => {
-    console.log('📋 [GET CLIENT REQUESTS] Looking for requests by email:', clientEmail);
-    console.log('📋 [GET CLIENT REQUESTS] Total requests in store:', store.requests.length);
-    console.log('📋 [GET CLIENT REQUESTS] All requests:', store.requests);
-    
     // Show ALL requests created by this client (both open_request and client_request types)
-    const clientRequests = store.requests.filter(req => {
-      const emailMatch = req.client.email === clientEmail;
-      const typeMatch = req.type === 'open_request' || req.type === 'client_request';
-      console.log('📋 [GET CLIENT REQUESTS] Request check:', {
-        requestId: req.id,
-        requestEmail: req.client.email,
-        clientEmail,
-        emailMatch,
-        type: req.type,
-        typeMatch,
-        finalMatch: emailMatch && typeMatch
-      });
-      return emailMatch && typeMatch;
-    });
-    
-    console.log('📋 [GET CLIENT REQUESTS] Filtered results:', clientRequests.length, 'requests');
-    console.log('📋 [GET CLIENT REQUESTS] Results:', clientRequests);
-    
-    return clientRequests;
+    return store.requests.filter(req => 
+      req.client.email === clientEmail && 
+      (req.type === 'open_request' || req.type === 'client_request')
+    );
   };
 
   // Update a request (only if it belongs to the client)
@@ -609,12 +577,30 @@ export function useLocalStore() {
       throw new Error('Request not found or unauthorized');
     }
 
-    setStore(prev => ({
-      ...prev,
-      requests: prev.requests.map(req =>
+    // Update in shared localStorage first
+    try {
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = existingRequests.map((req: any) =>
         req.id === requestId ? { ...req, ...updates } : req
-      )
-    }));
+      );
+      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
+      
+      // Update React state to match localStorage
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
+    } catch (error) {
+      console.error('Error updating request in localStorage:', error);
+      // Fallback to state-only update
+      setStore(prev => ({
+        ...prev,
+        requests: prev.requests.map(req =>
+          req.id === requestId ? { ...req, ...updates } : req
+        )
+      }));
+    }
   };
 
   // Delete a request (only if it belongs to the client)
@@ -624,10 +610,26 @@ export function useLocalStore() {
       throw new Error('Request not found or unauthorized');
     }
 
-    setStore(prev => ({
-      ...prev,
-      requests: prev.requests.filter(req => req.id !== requestId)
-    }));
+    // Remove from shared localStorage first
+    try {
+      const currentRequests = localStorage.getItem(SHARED_REQUESTS_KEY);
+      const existingRequests = currentRequests ? JSON.parse(currentRequests) : [];
+      const updatedRequests = existingRequests.filter((req: any) => req.id !== requestId);
+      localStorage.setItem(SHARED_REQUESTS_KEY, JSON.stringify(updatedRequests));
+      
+      // Update React state to match localStorage
+      setStore(prev => ({
+        ...prev,
+        requests: updatedRequests
+      }));
+    } catch (error) {
+      console.error('Error deleting request from localStorage:', error);
+      // Fallback to state-only update
+      setStore(prev => ({
+        ...prev,
+        requests: prev.requests.filter(req => req.id !== requestId)
+      }));
+    }
 
     // If it was a client_request, mark the time slot as available again
     if (request.type === 'client_request' && request.targetInspectorEmail) {

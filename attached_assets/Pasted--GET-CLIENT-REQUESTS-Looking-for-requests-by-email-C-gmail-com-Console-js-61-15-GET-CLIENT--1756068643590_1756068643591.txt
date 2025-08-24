@@ -1,0 +1,50 @@
+📋 [GET CLIENT REQUESTS] Looking for requests by email: C@gmail.com Console.js:61:15
+📋 [GET CLIENT REQUESTS] Total requests in store: 2 Console.js:61:15
+📋 [GET CLIENT REQUESTS] All requests: 
+Array [ {…}, {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Request check: 
+Object { requestId: "req_1756068349235", requestEmail: "C@gmail.com", clientEmail: "C@gmail.com", emailMatch: true, type: "client_request", typeMatch: true, finalMatch: true }
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Request check: 
+Object { requestId: "req_1756066846726", requestEmail: "C@gmail.com", clientEmail: "C@gmail.com", emailMatch: true, type: "open_request", typeMatch: true, finalMatch: true }
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Filtered results: 2 requests Console.js:61:15
+📋 [GET CLIENT REQUESTS] Results: 
+Array [ {…}, {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Looking for requests by email: C@gmail.com Console.js:61:15
+📋 [GET CLIENT REQUESTS] Total requests in store: 1 Console.js:61:15
+📋 [GET CLIENT REQUESTS] All requests: 
+Array [ {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Request check: 
+Object { requestId: "req_1756068349235", requestEmail: "C@gmail.com", clientEmail: "C@gmail.com", emailMatch: true, type: "client_request", typeMatch: true, finalMatch: true }
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Filtered results: 1 requests Console.js:61:15
+📋 [GET CLIENT REQUESTS] Results: 
+Array [ {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Looking for requests by email: C@gmail.com Console.js:61:15
+📋 [GET CLIENT REQUESTS] Total requests in store: 1 Console.js:61:15
+📋 [GET CLIENT REQUESTS] All requests: 
+Array [ {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Request check: 
+Object { requestId: "req_1756068349235", requestEmail: "C@gmail.com", clientEmail: "C@gmail.com", emailMatch: true, type: "client_request", typeMatch: true, finalMatch: true }
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Filtered results: 1 requests Console.js:61:15
+📋 [GET CLIENT REQUESTS] Results: 
+Array [ {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Looking for requests by email: C@gmail.com Console.js:61:15
+📋 [GET CLIENT REQUESTS] Total requests in store: 1 Console.js:61:15
+📋 [GET CLIENT REQUESTS] All requests: 
+Array [ {…} ]
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Request check: 
+Object { requestId: "req_1756068349235", requestEmail: "C@gmail.com", clientEmail: "C@gmail.com", emailMatch: true, type: "client_request", typeMatch: true, finalMatch: true }
+Console.js:61:15
+📋 [GET CLIENT REQUESTS] Filtered results: 1 requests Console.js:61:15
+📋 [GET CLIENT REQUESTS] Results: 
+Array [ {…} ]
