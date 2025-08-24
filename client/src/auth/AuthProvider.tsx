@@ -42,8 +42,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Initialize demo accounts
-        initializeDemoAccounts();
+        // Initialize demo accounts and wait for completion
+        await initializeDemoAccounts();
         
         const session = getSession();
         if (session) {
