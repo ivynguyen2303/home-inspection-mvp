@@ -130,10 +130,23 @@ export function useLocalStore() {
     };
     console.log('addRequest created request:', newRequest);
     
-    setStore(prev => ({
-      ...prev,
-      requests: [newRequest, ...prev.requests]
-    }));
+    // Try direct localStorage manipulation as backup
+    try {
+      const currentData = localStorage.getItem(STORAGE_KEY);
+      const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
+      const updatedData = {
+        ...parsed,
+        requests: [newRequest, ...parsed.requests]
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+      console.log('addRequest - Direct localStorage save successful');
+      
+      // Force React to re-read from localStorage
+      setStore(updatedData);
+      console.log('addRequest - Forced store update');
+    } catch (error) {
+      console.error('addRequest - localStorage backup failed:', error);
+    }
     
     return newRequest.id;
   };
