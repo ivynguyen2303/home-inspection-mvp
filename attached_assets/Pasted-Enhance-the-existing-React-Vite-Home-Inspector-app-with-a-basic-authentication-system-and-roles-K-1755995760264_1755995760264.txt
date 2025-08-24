@@ -1,0 +1,126 @@
+Enhance the existing React + Vite Home Inspector app with a basic authentication system and roles. Keep it local-only (no backend) for demo purposes, using localStorage, but write code so we can later replace the storage layer with a real backend (e.g., Supabase/Firebase).
+
+## Requirements
+- Add routes: "/login", "/signup", "/account", and a logout action.
+- On **Sign Up**, user chooses a role: "client" or "inspector".
+- On **Login**, validate email + password against stored users.
+- Persist session to localStorage; restore on reload.
+- Protect role-specific routes:
+  - Clients can post requests at "/post".
+  - Inspectors can view dashboard at "/inspector" and requests at "/requests".
+- Header shows "Login" / "Create account" when logged out; when logged in shows user email (or name), role badge, and "Logout".
+
+## Data models (local for MVP)
+Create `src/auth/types.ts` (or .js with JSDoc):
+type Role = "client" | "inspector";
+
+export interface User {
+  id: string;            // "usr_xxxx"
+  email: string;
+  passwordHash: string;  // store hash, not raw password
+  role: Role;
+  name?: string;
+  phone?: string;
+  createdAt: string;
+}
+
+export interface Session {
+  userId: string;
+  createdAt: string;
+}
+
+## Storage layer
+Create `src/auth/storage.ts` with helpers that wrap localStorage:
+- getUsers(): User[]
+- saveUsers(users: User[]): void
+- findUserByEmail(email: string): User | undefined
+- addUser(user: User): void
+- getSession(): Session | null
+- setSession(session: Session | null): void
+
+Password hashing (client-only):
+- Use Web Crypto: `crypto.subtle.digest('SHA-256', utf8)` then hex encode.
+- Expose `hashPassword(plain: string): Promise<string>`.
+
+## Auth context + hooks
+Create `src/auth/AuthProvider.tsx`:
+- React context that stores `{ user, loading, login, signup, logout }`.
+- On mount, read session from localStorage and resolve the current user.
+- `login(email, password)`:
+  - find user, hash input password, compare to user.passwordHash.
+  - set session on success.
+- `signup({email, password, role, name?, phone?})`:
+  - ensure email unique, hash password, create user with id "usr_${nanoid}" and set session.
+  - If role === "inspector", also initialize a minimal inspector profile (serviceAreas: [], specialties: [], basePrice: null) in existing store if present.
+- `logout()` clears session.
+
+Create `src/auth/useAuth.ts` to expose the context.
+
+## Route guards
+Create `src/auth/ProtectedRoute.tsx` and `src/auth/RoleRoute.tsx`:
+- `<ProtectedRoute>`: if no user, redirect to "/login".
+- `<RoleRoute role="inspector">`: requires login AND matching role; otherwise redirect to "/login" or show 403 page (`/forbidden`).
+
+## Pages
+Add:
+1) `src/pages/Signup.tsx`
+   - Fields: email, password (min 8), confirm password, role (radio: client/inspector), name (optional), phone (optional).
+   - On submit: `signup()`, then redirect:
+     - client → "/post"
+     - inspector → "/inspector"
+   - Show validation errors inline.
+
+2) `src/pages/Login.tsx`
+   - Fields: email, password
+   - On success: redirect based on role:
+     - client → "/post"
+     - inspector → "/inspector"
+   - Link to "/signup".
+
+3) `src/pages/Account.tsx`
+   - Show email, role, createdAt.
+   - Allow editing `name` and `phone` (persist back into users array).
+   - If inspector: link to edit profile in "/inspector".
+   - If client: link to "/post".
+   - Button: "Logout".
+
+4) `src/pages/Forbidden.tsx` (simple 403 message + link home)
+
+## Header updates
+- If logged out: buttons "Login" and "Create account".
+- If logged in: show "Hi, {name || email}" + a small role chip: [Client] or [Inspector], links to "/account" and "Logout".
+- Keep existing navigation; add role-aware CTAs:
+  - For clients: show "Post a Request" → "/post"
+  - For inspectors: show "View Requests" → "/requests" and "Dashboard" → "/inspector"
+
+## Routing
+Update `src/App.tsx` (or the router file) to include:
+- <Route path="/login" element={<Login/>} />
+- <Route path="/signup" element={<Signup/>} />
+- <Route path="/account" element={<ProtectedRoute><Account/></ProtectedRoute>} />
+- <Route path="/post" element={<RoleRoute role="client"><PostRequest/></RoleRoute>} />
+- <Route path="/inspector" element={<RoleRoute role="inspector"><InspectorDashboard/></RoleRoute>} />
+- <Route path="/requests" element={<RoleRoute role="inspector"><RequestsList/></RoleRoute>} />
+- <Route path="/requests/:id" element={<RoleRoute role="inspector"><RequestDetail/></RoleRoute>} />
+- <Route path="/forbidden" element={<Forbidden/>} />
+
+## UX details
+- Form validation: email format, password length (≥ 8), confirm password match.
+- Error states: bad credentials on login, duplicate email on signup.
+- Accessibility: labels for inputs, aria-live for form errors.
+- Keep styling consistent with current design (Tailwind or your CSS system).
+
+## Acceptance criteria
+- Users can sign up as either Client or Inspector and then log in.
+- Session persists across reloads; logout clears it.
+- Role-protected routes redirect appropriately.
+- Header reflects auth state and role.
+- Inspector signup auto-creates a minimal inspector profile (if the app already supports profiles).
+- No backend required; everything works via localStorage with a password hash.
+
+## Optional (nice to have)
+- "Demo accounts" buttons on /login to auto-fill:
+  - Client demo: client_demo@example.com / DemoPass123
+  - Inspector demo: inspector_demo@example.com / DemoPass123
+- Password strength hint on signup.
+- Toasts on login/logout/signup success.
