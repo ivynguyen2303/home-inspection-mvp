@@ -8,11 +8,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useLocalStore } from '@/store/localStore';
+import { useAuth } from '@/auth/AuthProvider';
 import { LayoutDashboard, Heart, Settings, Plus, Briefcase, Calendar } from 'lucide-react';
 
 export default function InspectorDashboard() {
   const { requests, getMyInterests, inspectorProfile } = useLocalStore();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('requests');
+  
+  // Debug: Show what inspector is logged in
+  console.log('Inspector Dashboard - Login debug:', {
+    userEmail: user?.email,
+    userId: user?.id,
+    profileId: inspectorProfile.id,
+    profileName: inspectorProfile.displayName,
+    idsMatch: user?.id === inspectorProfile.id
+  });
   
   
   // Filter requests for this inspector only
