@@ -1,0 +1,121 @@
+🏪 [STORE INIT] Starting store initialization Console.js:61:15
+🏪 [STORE INIT] Current user email: undefined Console.js:61:15
+🏪 [STORE INIT] User storage key: inspect_now_store Console.js:61:15
+🏪 [STORE INIT] Shared requests key: inspect_now_shared_requests Console.js:61:15
+🔍 [STORAGE DEBUG] All localStorage keys: 
+Array(12) [ "eruda-entry-button", "eruda-resources", "inspect_now_store_I2@gmail.com", "inspect_now_users", "inspect_now_store_C@gmail.com", "eruda-dev-tools", "inspect_now_shared_requests", "app_initialized", "inspect_now_store_I@gmail.com", "eruda-elements", … ]
+Console.js:61:15
+🔍 [STORAGE DEBUG] Looking for key: inspect_now_shared_requests Console.js:61:15
+🏪 [STORE INIT] Raw shared requests from localStorage: Console.js:61:15
+🏪 [STORE INIT] Length: 811 Console.js:61:15
+🏪 [STORE INIT] Content: [{"id":"req_1756067346318","createdAt":"2025-08-24T20:29:06.318Z","status":"open","type":"client_request","targetInspectorEmail":"I@gmail.com","client":{"name":"1","email":"C@gmail.com","phone":"1"},"property":{"address":"1","cityZip":"1","type":"House","beds":3,"baths":2},"schedule":{"preferredDate":"Thu Jan 2 9:00 AM-11:00 AM"},"notes":"Booking request for Thu Jan 2 9:00 AM-11:00 AM","interestCount":1,"interestedInspectorEmails":["I@gmail.com"]},{"status":"open","type":"open_request","client":{"name":"1","email":"C@gmail.com","phone":""},"property":{"address":"1","cityZip":"1","type":"House","beds":1,"baths":1},"schedule":{"preferredDate":"2025-08-25","altDate":"2025-08-26"},"notes":"","id":"req_1756066846726","createdAt":"2025-08-24T20:20:46.726Z","interestCount":0,"interestedInspectorEmails":[]}] Console.js:61:15
+🏪 [STORE INIT] Parsed shared requests: 
+Array [ {…}, {…} ]
+Console.js:61:15
+🏪 [STORE INIT] Parsed type: object Console.js:61:15
+🏪 [STORE INIT] Is array? true Console.js:61:15
+🔍 [FORMAT CHECK] Request: req_1756067346318 has old fields: false Console.js:61:15
+🔍 [FORMAT CHECK] Request: req_1756066846726 has old fields: false Console.js:61:15
+🔍 [FORMAT CHECK] Has old format? false Console.js:61:15
+✅ [STORE INIT] Final shared requests loaded: 2 requests Console.js:61:15
+✅ [STORE INIT] Request IDs: 
+Array [ "req_1756067346318", "req_1756066846726" ]
+Console.js:61:15
+🏪 [STORE INIT] Raw user data from localStorage: {"inspectorProfile":{"email":"I@gmail.com","displayName":"I","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":true},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":true},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":true},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":true},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":true}]},"contact":{"phone":"(555) 123-4567","email":"I@gmail.com"},"insurance":"$1M Professional Liability"},"allInspectorProfiles":[{"email":"I@gmail.com","displayName":"I","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":true},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":true},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":true},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":true},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":true}]},"contact":{"phone":"(555) 123-4567","email":"I@gmail.com"},"insurance":"$1M Professional Liability"},{"email":"I2@gmail.com","displayName":"I2","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1472099645-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":true},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":true},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":true},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":true},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":true}]},"contact":{"phone":"(555) 123-4567","email":"I2@gmail.com"},"insurance":"$1M Professional Liability"}]} Console.js:61:15
+🏪 [STORE INIT] Parsed user data: 
+Object { inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+🏪 [STORE INIT] User profiles loaded successfully Console.js:61:15
+🏪 [STORE INIT] Final initial store: 
+Object { requests: (2) […], inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+🏪 [STORE INIT] Requests count: 2 Console.js:61:15
+💾 [STORE SAVE] Store changed, saving to localStorage Console.js:61:15
+💾 [STORE SAVE] Current store: 
+Object { requests: (2) […], inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+💾 [STORE SAVE] Requests to save: 2 Console.js:61:15
+💾 [STORE SAVE] Saved shared requests to: inspect_now_shared_requests Console.js:61:15
+💾 [STORE SAVE] Requests JSON length: 811 Console.js:61:15
+💾 [STORE SAVE] Saved user data to: inspect_now_store Console.js:61:15
+💾 [STORE SAVE] Verification - Can we read back requests? YES Console.js:61:15
+💾 [STORE SAVE] Verification - Parsed requests count: 2 Console.js:61:15
+🏪 [STORE INIT] Starting store initialization Console.js:61:15
+🏪 [STORE INIT] Current user email: C@gmail.com Console.js:61:15
+🏪 [STORE INIT] User storage key: inspect_now_store_C@gmail.com Console.js:61:15
+🏪 [STORE INIT] Shared requests key: inspect_now_shared_requests Console.js:61:15
+🔍 [STORAGE DEBUG] All localStorage keys: 
+Array(13) [ "eruda-entry-button", "eruda-resources", "inspect_now_session", "inspect_now_store_I2@gmail.com", "inspect_now_users", "inspect_now_store_C@gmail.com", "eruda-dev-tools", "inspect_now_shared_requests", "app_initialized", "inspect_now_store_I@gmail.com", … ]
+Console.js:61:15
+🔍 [STORAGE DEBUG] Looking for key: inspect_now_shared_requests Console.js:61:15
+🏪 [STORE INIT] Raw shared requests from localStorage: Console.js:61:15
+🏪 [STORE INIT] Length: 811 Console.js:61:15
+🏪 [STORE INIT] Content: [{"id":"req_1756067346318","createdAt":"2025-08-24T20:29:06.318Z","status":"open","type":"client_request","targetInspectorEmail":"I@gmail.com","client":{"name":"1","email":"C@gmail.com","phone":"1"},"property":{"address":"1","cityZip":"1","type":"House","beds":3,"baths":2},"schedule":{"preferredDate":"Thu Jan 2 9:00 AM-11:00 AM"},"notes":"Booking request for Thu Jan 2 9:00 AM-11:00 AM","interestCount":1,"interestedInspectorEmails":["I@gmail.com"]},{"status":"open","type":"open_request","client":{"name":"1","email":"C@gmail.com","phone":""},"property":{"address":"1","cityZip":"1","type":"House","beds":1,"baths":1},"schedule":{"preferredDate":"2025-08-25","altDate":"2025-08-26"},"notes":"","id":"req_1756066846726","createdAt":"2025-08-24T20:20:46.726Z","interestCount":0,"interestedInspectorEmails":[]}] Console.js:61:15
+🏪 [STORE INIT] Parsed shared requests: 
+Array [ {…}, {…} ]
+Console.js:61:15
+🏪 [STORE INIT] Parsed type: object Console.js:61:15
+🏪 [STORE INIT] Is array? true Console.js:61:15
+🔍 [FORMAT CHECK] Request: req_1756067346318 has old fields: false Console.js:61:15
+🔍 [FORMAT CHECK] Request: req_1756066846726 has old fields: false Console.js:61:15
+🔍 [FORMAT CHECK] Has old format? false Console.js:61:15
+✅ [STORE INIT] Final shared requests loaded: 2 requests Console.js:61:15
+✅ [STORE INIT] Request IDs: 
+Array [ "req_1756067346318", "req_1756066846726" ]
+Console.js:61:15
+🏪 [STORE INIT] Raw user data from localStorage: {"inspectorProfile":{"email":"I2@gmail.com","displayName":"I2","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1472099645-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":true},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":true},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":true},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":true},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":true}]},"contact":{"phone":"(555) 123-4567","email":"I2@gmail.com"},"insurance":"$1M Professional Liability"},"allInspectorProfiles":[{"email":"I@gmail.com","displayName":"I","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":false},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":false},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":false},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":false},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":false}]},"contact":{"phone":"(555) 123-4567","email":"I@gmail.com"},"insurance":"$1M Professional Liability"},{"email":"I2@gmail.com","displayName":"I2","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1472099645-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":true},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":true},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":true},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":true},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":true}]},"contact":{"phone":"(555) 123-4567","email":"I2@gmail.com"},"insurance":"$1M Professional Liability"}]} Console.js:61:15
+🏪 [STORE INIT] Parsed user data: 
+Object { inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+🏪 [STORE INIT] User profiles loaded successfully Console.js:61:15
+🏪 [STORE INIT] Final initial store: 
+Object { requests: (2) […], inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+🏪 [STORE INIT] Requests count: 2 Console.js:61:15
+💾 [STORE SAVE] Store changed, saving to localStorage Console.js:61:15
+💾 [STORE SAVE] Current store: 
+Object { requests: (2) […], inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+💾 [STORE SAVE] Requests to save: 2 Console.js:61:15
+💾 [STORE SAVE] Saved shared requests to: inspect_now_shared_requests Console.js:61:15
+💾 [STORE SAVE] Requests JSON length: 811 Console.js:61:15
+💾 [STORE SAVE] Saved user data to: inspect_now_store_C@gmail.com Console.js:61:15
+💾 [STORE SAVE] Verification - Can we read back requests? YES Console.js:61:15
+💾 [STORE SAVE] Verification - Parsed requests count: 2 Console.js:61:15
+GET
+https://images.unsplash.com/photo-1472099645-0b93528c311a?w=400&h=400&fit=crop&crop=face
+NS_BINDING_ABORTED
+
+A resource is blocked by OpaqueResponseBlocking, please check browser console for details. photo-1472099645-0b93528c311a
+🏪 [STORE INIT] Starting store initialization Console.js:61:15
+🏪 [STORE INIT] Current user email: C@gmail.com Console.js:61:15
+🏪 [STORE INIT] User storage key: inspect_now_store_C@gmail.com Console.js:61:15
+🏪 [STORE INIT] Shared requests key: inspect_now_shared_requests Console.js:61:15
+🔍 [STORAGE DEBUG] All localStorage keys: 
+Array(13) [ "eruda-entry-button", "eruda-resources", "inspect_now_session", "inspect_now_store_I2@gmail.com", "inspect_now_users", "inspect_now_store_C@gmail.com", "eruda-dev-tools", "inspect_now_shared_requests", "app_initialized", "inspect_now_store_I@gmail.com", … ]
+Console.js:61:15
+🔍 [STORAGE DEBUG] Looking for key: inspect_now_shared_requests Console.js:61:15
+🏪 [STORE INIT] Raw shared requests from localStorage: Console.js:61:15
+🏪 [STORE INIT] Length: 811 Console.js:61:15
+🏪 [STORE INIT] Content: [{"id":"req_1756067346318","createdAt":"2025-08-24T20:29:06.318Z","status":"open","type":"client_request","targetInspectorEmail":"I@gmail.com","client":{"name":"1","email":"C@gmail.com","phone":"1"},"property":{"address":"1","cityZip":"1","type":"House","beds":3,"baths":2},"schedule":{"preferredDate":"Thu Jan 2 9:00 AM-11:00 AM"},"notes":"Booking request for Thu Jan 2 9:00 AM-11:00 AM","interestCount":1,"interestedInspectorEmails":["I@gmail.com"]},{"status":"open","type":"open_request","client":{"name":"1","email":"C@gmail.com","phone":""},"property":{"address":"1","cityZip":"1","type":"House","beds":1,"baths":1},"schedule":{"preferredDate":"2025-08-25","altDate":"2025-08-26"},"notes":"","id":"req_1756066846726","createdAt":"2025-08-24T20:20:46.726Z","interestCount":0,"interestedInspectorEmails":[]}] Console.js:61:15
+🏪 [STORE INIT] Parsed shared requests: 
+Array [ {…}, {…} ]
+Console.js:61:15
+🏪 [STORE INIT] Parsed type: object Console.js:61:15
+🏪 [STORE INIT] Is array? true Console.js:61:15
+🔍 [FORMAT CHECK] Request: req_1756067346318 has old fields: false Console.js:61:15
+🔍 [FORMAT CHECK] Request: req_1756066846726 has old fields: false Console.js:61:15
+🔍 [FORMAT CHECK] Has old format? false Console.js:61:15
+✅ [STORE INIT] Final shared requests loaded: 2 requests Console.js:61:15
+✅ [STORE INIT] Request IDs: 
+Array [ "req_1756067346318", "req_1756066846726" ]
+Console.js:61:15
+🏪 [STORE INIT] Raw user data from localStorage: {"inspectorProfile":{"email":"I2@gmail.com","displayName":"I2","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1472099645-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":true},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":true},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":true},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":true},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":true}]},"contact":{"phone":"(555) 123-4567","email":"I2@gmail.com"},"insurance":"$1M Professional Liability"},"allInspectorProfiles":[{"email":"I@gmail.com","displayName":"I","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":false},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":false},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":false},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":false},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":false}]},"contact":{"phone":"(555) 123-4567","email":"I@gmail.com"},"insurance":"$1M Professional Liability"},{"email":"I2@gmail.com","displayName":"I2","serviceAreas":["San Francisco Bay Area"],"specialties":[],"basePrice":400,"location":"San Francisco, CA","bio":"Professional home inspector with expertise in residential property assessments.","yearsExperience":1,"certifications":["State Licensed"],"rating":5,"reviewCount":0,"completedInspections":0,"image":"https://images.unsplash.com/photo-1472099645-0b93528c311a?w=400&h=400&fit=crop&crop=face","verified":true,"availability":{"nextAvailable":"This week","responseTime":"Within 4 hours","timeSlots":[{"id":"slot1","date":"Mon Dec 30","startTime":"9:00 AM","endTime":"11:00 AM","available":true},{"id":"slot2","date":"Mon Dec 30","startTime":"2:00 PM","endTime":"4:00 PM","available":true},{"id":"slot3","date":"Tue Dec 31","startTime":"10:00 AM","endTime":"12:00 PM","available":true},{"id":"slot4","date":"Wed Jan 1","startTime":"1:00 PM","endTime":"3:00 PM","available":true},{"id":"slot5","date":"Thu Jan 2","startTime":"9:00 AM","endTime":"11:00 AM","available":true}]},"contact":{"phone":"(555) 123-4567","email":"I2@gmail.com"},"insurance":"$1M Professional Liability"}]} Console.js:61:15
+🏪 [STORE INIT] Parsed user data: 
+Object { inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+🏪 [STORE INIT] User profiles loaded successfully Console.js:61:15
+🏪 [STORE INIT] Final initial store: 
+Object { requests: (2) […], inspectorProfile: {…}, allInspectorProfiles: (2) […] }
+Console.js:61:15
+🏪 [STORE INIT] Requests count: 2 Console.js:61:15

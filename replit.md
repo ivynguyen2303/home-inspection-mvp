@@ -24,10 +24,11 @@ Preferred communication style: Simple, everyday language.
 - **API Structure**: RESTful API design with /api prefix routing
 
 ## Data Layer
-- **Storage**: LocalStorage-based system with centralized inspector profile management
+- **Storage**: Hybrid localStorage system - shared storage for requests (persistent across accounts) and user-specific storage for profiles
 - **Schema**: TypeScript interfaces for type safety between frontend components
 - **Real-time Updates**: Inspector profiles created during signup immediately appear in client directory
-- **Data Structure**: Separate storage for user accounts, inspector profiles, and service requests
+- **Data Structure**: Shared requests storage with user-specific profile storage for optimal data persistence
+- **Request Types**: Two distinct request types - open_request (visible to all inspectors) and client_request (visible only to targeted inspector)
 
 ## Design System
 - **Component Library**: Custom implementation built on Radix UI primitives
