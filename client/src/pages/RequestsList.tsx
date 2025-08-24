@@ -25,9 +25,9 @@ export default function RequestsList() {
           return true; // All inspectors can see open requests
         } else if (req.type === 'client_request') {
           // Client requests should ONLY be visible to the targeted inspector
-          const isTargetedToMe = req.targetInspectorId && 
-                                inspectorProfile.id && 
-                                String(req.targetInspectorId) === String(inspectorProfile.id);
+          const isTargetedToMe = req.targetInspectorEmail && 
+                                inspectorProfile.email && 
+                                String(req.targetInspectorEmail) === String(inspectorProfile.email);
           return isTargetedToMe;
         }
         return false; // Hide any other request types
@@ -51,7 +51,7 @@ export default function RequestsList() {
         return true;
       })
       .sort((a, b) => new Date(a.schedule.preferredDate).getTime() - new Date(b.schedule.preferredDate).getTime());
-  }, [requests, cityFilter, propertyTypeFilter, earliestDateFilter, inspectorProfile.id]);
+  }, [requests, cityFilter, propertyTypeFilter, earliestDateFilter, inspectorProfile.email]);
 
   return (
     <div className="min-h-screen bg-gray-50">

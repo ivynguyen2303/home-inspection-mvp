@@ -5,7 +5,7 @@ export interface Request {
   createdAt: string;
   status: 'open' | 'matched' | 'closed';
   type: 'client_request' | 'open_request';
-  targetInspectorId?: string; // Only for client_request type
+  targetInspectorEmail?: string; // Only for client_request type
   client: {
     name: string;
     email: string;
@@ -26,16 +26,15 @@ export interface Request {
   budget?: number;
   notes: string;
   interestCount: number;
-  interestedInspectorIds: string[];
+  interestedInspectorEmails: string[];
 }
 
 export interface InspectorProfile {
-  id: string;
+  email: string; // Primary identifier
   displayName: string;
   serviceAreas: string[];
   specialties: string[];
   basePrice: number;
-  email?: string;
   phone?: string;
   location?: string;
   bio?: string;
@@ -72,7 +71,7 @@ interface LocalStore {
 }
 
 const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
-  id: 'inspector_demo',
+  email: 'inspector_demo@example.com',
   displayName: 'Demo Inspector',
   serviceAreas: ['San Francisco', 'Oakland', 'San Jose', 'Palo Alto'],
   specialties: ['Foundation', 'Electrical', 'Plumbing', 'HVAC'],
@@ -124,13 +123,13 @@ export function useLocalStore() {
     }
   }, [store]);
 
-  const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorIds'>) => {
+  const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorEmails'>) => {
     const newRequest: Request = {
       ...requestData,
       id: `req_${Date.now()}`,
       createdAt: new Date().toISOString(),
       interestCount: 0,
-      interestedInspectorIds: []
+      interestedInspectorEmails: []
     };
     
     // Try direct localStorage manipulation as backup
@@ -156,8 +155,8 @@ export function useLocalStore() {
     return newRequest.id;
   };
 
-  const toggleInterest = (requestId: string, inspectorId: string) => {
-    console.log('toggleInterest called for:', { requestId, inspectorId });
+  const toggleInterest = (requestId: string, inspectorEmail: string) => {
+    console.log('toggleInterest called for:', { requestId, inspectorEmail });
     
     // Direct localStorage manipulation to ensure persistence
     try {
@@ -166,23 +165,23 @@ export function useLocalStore() {
       
       const updatedRequests = parsed.requests.map((req: Request) => {
         if (req.id === requestId) {
-          const isInterested = req.interestedInspectorIds.includes(inspectorId);
-          const interestedInspectorIds = isInterested
-            ? req.interestedInspectorIds.filter((id: string) => id !== inspectorId)
-            : [...req.interestedInspectorIds, inspectorId];
+          const isInterested = req.interestedInspectorEmails.includes(inspectorEmail);
+          const interestedInspectorEmails = isInterested
+            ? req.interestedInspectorEmails.filter((email: string) => email !== inspectorEmail)
+            : [...req.interestedInspectorEmails, inspectorEmail];
           
           const updatedRequest = {
             ...req,
-            interestedInspectorIds,
-            interestCount: interestedInspectorIds.length
+            interestedInspectorEmails,
+            interestCount: interestedInspectorEmails.length
           };
           
           console.log('toggleInterest - Updated request:', {
             id: requestId,
             wasInterested: isInterested,
             nowInterested: !isInterested,
-            newCount: interestedInspectorIds.length,
-            interestedInspectorIds
+            newCount: interestedInspectorEmails.length,
+            interestedInspectorEmails
           });
           
           return updatedRequest;
@@ -213,7 +212,7 @@ export function useLocalStore() {
       const updatedProfile = { ...prev.inspectorProfile, ...updates };
       // Also update in the all profiles list
       const updatedAllProfiles = prev.allInspectorProfiles.map(profile => 
-        profile.id === updatedProfile.id ? updatedProfile : profile
+        profile.email === updatedProfile.email ? updatedProfile : profile
       );
       
       return {
@@ -224,9 +223,9 @@ export function useLocalStore() {
     });
   };
 
-  // Set the current inspector profile by user ID (for login)
-  const setCurrentInspectorProfile = (userId: string) => {
-    const profile = getInspectorProfileById(userId);
+  // Set the current inspector profile by email (for login)
+  const setCurrentInspectorProfile = (userEmail: string) => {
+    const profile = getInspectorProfileByEmail(userEmail);
     if (profile) {
       setStore(prev => ({
         ...prev,
@@ -238,7 +237,7 @@ export function useLocalStore() {
   const addInspectorProfile = (profile: InspectorProfile) => {
     setStore(prev => ({
       ...prev,
-      allInspectorProfiles: [...prev.allInspectorProfiles.filter(p => p.id !== profile.id), profile]
+      allInspectorProfiles: [...prev.allInspectorProfiles.filter(p => p.email !== profile.email), profile]
     }));
     
     // Trigger a storage event to notify other components
@@ -251,26 +250,26 @@ export function useLocalStore() {
     return store.allInspectorProfiles;
   };
 
-  const getInspectorProfileById = (id: string) => {
-    return store.allInspectorProfiles.find(profile => profile.id === id);
+  const getInspectorProfileByEmail = (email: string) => {
+    return store.allInspectorProfiles.find(profile => profile.email === email);
   };
 
   // Remove inspector profile when account is deleted
-  const removeInspectorProfile = (userId: string) => {
-    console.log('removeInspectorProfile called for userId:', userId);
+  const removeInspectorProfile = (userEmail: string) => {
+    console.log('removeInspectorProfile called for userEmail:', userEmail);
     
     // Direct localStorage manipulation to ensure persistence
     try {
       const currentData = localStorage.getItem(STORAGE_KEY);
       const parsed = currentData ? JSON.parse(currentData) : { requests: [], inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
       
-      console.log('removeInspectorProfile - All profile IDs:', parsed.allInspectorProfiles.map((p: InspectorProfile) => p.id));
-      console.log('removeInspectorProfile - Looking for userId:', userId);
+      console.log('removeInspectorProfile - All profile emails:', parsed.allInspectorProfiles.map((p: InspectorProfile) => p.email));
+      console.log('removeInspectorProfile - Looking for userEmail:', userEmail);
       
       // Remove the inspector profile
       const updatedProfiles = parsed.allInspectorProfiles.filter((profile: InspectorProfile) => {
-        const shouldKeep = profile.id !== userId;
-        console.log(`removeInspectorProfile - Profile ${profile.id}: ${shouldKeep ? 'KEEP' : 'REMOVE'}`);
+        const shouldKeep = profile.email !== userEmail;
+        console.log(`removeInspectorProfile - Profile ${profile.email}: ${shouldKeep ? 'KEEP' : 'REMOVE'}`);
         return shouldKeep;
       });
       
@@ -305,7 +304,7 @@ export function useLocalStore() {
 
   const getMyInterests = () => {
     return store.requests.filter(req => 
-      req.interestedInspectorIds.includes(store.inspectorProfile.id)
+      req.interestedInspectorEmails.includes(store.inspectorProfile.email)
     );
   };
 
@@ -327,8 +326,8 @@ export function useLocalStore() {
     }
   ) => {
     // Find the inspector and time slot
-    const inspector = getInspectorProfileById(inspectorId);
-    const timeSlot = inspector?.availability?.timeSlots?.find(slot => slot.id === timeSlotId);
+    const inspector = getInspectorProfileByEmail(inspectorId);
+    const timeSlot = inspector?.availability?.timeSlots?.find((slot: any) => slot.id === timeSlotId);
     
     if (!inspector || !timeSlot) {
       throw new Error('Inspector or time slot not found');
@@ -341,7 +340,7 @@ export function useLocalStore() {
       createdAt: new Date().toISOString(),
       status: 'open',
       type: 'client_request',
-      targetInspectorId: inspectorId,
+      targetInspectorEmail: inspectorId,
       client: {
         name: clientData.name,
         email: clientData.email,
@@ -360,7 +359,7 @@ export function useLocalStore() {
       },
       notes: clientData.notes || `Booking request for ${timeSlot.date} ${timeSlot.startTime}-${timeSlot.endTime}`,
       interestCount: 1,
-      interestedInspectorIds: [inspectorId]
+      interestedInspectorEmails: [inspectorId]
     };
 
     // Add the request
@@ -373,7 +372,7 @@ export function useLocalStore() {
     setStore(prev => ({
       ...prev,
       allInspectorProfiles: prev.allInspectorProfiles.map(profile => {
-        if (profile.id === inspectorId && profile.availability?.timeSlots) {
+        if (profile.email === inspectorId && profile.availability?.timeSlots) {
           return {
             ...profile,
             availability: {
@@ -432,7 +431,7 @@ export function useLocalStore() {
       budget: clientData.budget,
       notes: clientData.notes || '',
       interestCount: 0,
-      interestedInspectorIds: []
+      interestedInspectorEmails: []
     };
 
     // Add the request
@@ -484,11 +483,11 @@ export function useLocalStore() {
     }));
 
     // If it was a client_request, mark the time slot as available again
-    if (request.type === 'client_request' && request.targetInspectorId) {
+    if (request.type === 'client_request' && request.targetInspectorEmail) {
       setStore(prev => ({
         ...prev,
         allInspectorProfiles: prev.allInspectorProfiles.map(profile => {
-          if (profile.id === request.targetInspectorId && profile.availability?.timeSlots) {
+          if (profile.email === request.targetInspectorEmail && profile.availability?.timeSlots) {
             return {
               ...profile,
               availability: {
@@ -518,7 +517,7 @@ export function useLocalStore() {
     setCurrentInspectorProfile,
     addInspectorProfile,
     getAllInspectorProfiles,
-    getInspectorProfileById,
+    getInspectorProfileByEmail,
     removeInspectorProfile,
     getRequestById,
     getMyInterests,

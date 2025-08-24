@@ -68,7 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Auto-load inspector profile when inspector logs in
   useEffect(() => {
     if (authState.user && authState.user.role === 'inspector') {
-      setCurrentInspectorProfile(authState.user.id);
+      setCurrentInspectorProfile(authState.user.email);
     }
   }, [authState.user, setCurrentInspectorProfile]);
 
@@ -134,12 +134,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // If inspector role, initialize inspector profile
       if (data.role === 'inspector') {
         const inspectorProfile = {
-          id: user.id,
+          email: user.email,
           displayName: data.name || user.email.split('@')[0],
           serviceAreas: ['San Francisco Bay Area'],
           specialties: [],
           basePrice: 400,
-          email: user.email,
           phone: data.phone,
           location: 'San Francisco, CA',
           bio: `Professional home inspector with expertise in residential property assessments.`,
@@ -251,7 +250,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       deleteUser(userId);
       
       // ALSO remove inspector profile if they have one
-      removeInspectorProfile(userId);
+      removeInspectorProfile(authState.user.email);
       
       // Clear session
       setSession(null);

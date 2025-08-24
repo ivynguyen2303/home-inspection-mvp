@@ -28,9 +28,9 @@ export default function InspectorDashboard() {
     // Triple-check the filtering to ensure bulletproof targeting
     const isOpen = req.status === 'open';
     const isClientRequest = req.type === 'client_request';
-    const isTargetedToMe = req.targetInspectorId && 
-                          inspectorProfile.id && 
-                          String(req.targetInspectorId) === String(inspectorProfile.id);
+    const isTargetedToMe = req.targetInspectorEmail && 
+                          inspectorProfile.email && 
+                          String(req.targetInspectorEmail) === String(inspectorProfile.email);
     
     
     return isOpen && isClientRequest && isTargetedToMe;

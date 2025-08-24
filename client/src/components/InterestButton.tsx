@@ -13,13 +13,13 @@ export function InterestButton({ requestId, interestCount, className }: Interest
   const { inspectorProfile, toggleInterest, requests } = useLocalStore();
   
   const request = requests.find(r => r.id === requestId);
-  const isInterested = request?.interestedInspectorIds.includes(inspectorProfile.id) || false;
+  const isInterested = request?.interestedInspectorEmails.includes(inspectorProfile.email) || false;
   
   // Use the actual interestCount from the store to ensure it's always current
   const currentInterestCount = request?.interestCount || interestCount;
 
   const handleToggle = () => {
-    toggleInterest(requestId, inspectorProfile.id);
+    toggleInterest(requestId, inspectorProfile.email);
   };
 
   return (
