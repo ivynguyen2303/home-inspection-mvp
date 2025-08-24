@@ -144,7 +144,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           verified: true,
           availability: {
             nextAvailable: 'This week',
-            responseTime: 'Within 4 hours'
+            responseTime: 'Within 4 hours',
+            timeSlots: [
+              { id: 'slot1', date: 'Mon Dec 30', startTime: '9:00 AM', endTime: '11:00 AM', available: true },
+              { id: 'slot2', date: 'Mon Dec 30', startTime: '2:00 PM', endTime: '4:00 PM', available: true },
+              { id: 'slot3', date: 'Tue Dec 31', startTime: '10:00 AM', endTime: '12:00 PM', available: true },
+              { id: 'slot4', date: 'Wed Jan 1', startTime: '1:00 PM', endTime: '3:00 PM', available: true },
+              { id: 'slot5', date: 'Thu Jan 2', startTime: '9:00 AM', endTime: '11:00 AM', available: true }
+            ]
           },
           contact: {
             phone: data.phone || '(555) 123-4567',

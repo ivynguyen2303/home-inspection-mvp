@@ -5,6 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@/auth/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Star, 
   Briefcase, 
@@ -14,16 +24,52 @@ import {
   Mail, 
   Phone, 
   Clock,
-  ExternalLink
+  ExternalLink,
+  Calendar
 } from "lucide-react";
 import { useLocalStore, type InspectorProfile } from "@/store/localStore";
 
+
+const bookingSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Valid email is required'),
+  phone: z.string().min(1, 'Phone is required'),
+  address: z.string().min(1, 'Property address is required'),
+  cityZip: z.string().min(1, 'City and ZIP are required'),
+  propertyType: z.enum(['House', 'Townhome', 'Condo']),
+  beds: z.string().min(1, 'Number of bedrooms is required'),
+  baths: z.string().min(1, 'Number of bathrooms is required'),
+  sqft: z.string().optional(),
+  notes: z.string().optional()
+});
+
+type BookingFormData = z.infer<typeof bookingSchema>;
 
 export default function InspectorProfile() {
   const [match, params] = useRoute("/inspectors/:id");
   const [inspector, setInspector] = useState<InspectorProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const { getInspectorProfileById } = useLocalStore();
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { getInspectorProfileById, createBookingFromTimeSlot } = useLocalStore();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const form = useForm<BookingFormData>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      address: '',
+      cityZip: '',
+      propertyType: 'House',
+      beds: '3',
+      baths: '2',
+      sqft: '',
+      notes: ''
+    }
+  });
 
   useEffect(() => {
     if (!match || !params?.id) return;
@@ -34,6 +80,67 @@ export default function InspectorProfile() {
     setInspector(foundInspector || null);
     setLoading(false);
   }, [match, params?.id, getInspectorProfileById]);
+
+  const handleTimeSlotSelect = (timeSlotId: string) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to book an inspection",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (user.role !== 'client') {
+      toast({
+        title: "Client Account Required",
+        description: "Only client accounts can book inspections",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSelectedTimeSlot(timeSlotId);
+    setDialogOpen(true);
+  };
+
+  const onSubmitBooking = async (data: BookingFormData) => {
+    if (!selectedTimeSlot || !params?.id) return;
+
+    try {
+      const requestId = createBookingFromTimeSlot(selectedTimeSlot, params.id, {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        cityZip: data.cityZip,
+        propertyType: data.propertyType,
+        beds: parseInt(data.beds),
+        baths: parseInt(data.baths),
+        sqft: data.sqft ? parseInt(data.sqft) : undefined,
+        notes: data.notes
+      });
+
+      toast({
+        title: "Booking Requested!",
+        description: "Your inspection request has been sent to the inspector.",
+      });
+
+      setDialogOpen(false);
+      setSelectedTimeSlot(null);
+      form.reset();
+      
+      // Refresh inspector data to show updated availability
+      const updatedInspector = getInspectorProfileById(params.id);
+      setInspector(updatedInspector || null);
+    } catch (error) {
+      toast({
+        title: "Booking Failed",
+        description: error instanceof Error ? error.message : "Failed to create booking",
+        variant: "destructive"
+      });
+    }
+  };
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -166,7 +273,7 @@ export default function InspectorProfile() {
             <Card className="bg-white rounded-xl shadow-lg">
               <CardContent className="p-8">
                 <h2 className="text-2xl font-semibold text-secondary mb-6" data-testid="text-availability-title">Availability</h2>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div className="text-center p-6 bg-green-50 border border-green-200 rounded-lg">
                     <div className="text-2xl font-bold text-green-700 mb-2">{inspector.availability?.nextAvailable || 'This week'}</div>
                     <div className="text-green-600">Next Available</div>
@@ -176,12 +283,229 @@ export default function InspectorProfile() {
                     <div className="text-blue-600">Response Time</div>
                   </div>
                 </div>
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-muted text-center">
-                    <Clock className="inline mr-1 h-4 w-4" />
-                    Schedule an inspection by contacting {inspector.displayName} directly
-                  </p>
-                </div>
+
+                {/* Time Slots */}
+                {inspector.availability?.timeSlots && inspector.availability.timeSlots.length > 0 ? (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-medium text-secondary mb-4">Available Time Slots</h3>
+                    <div className="grid gap-3">
+                      {inspector.availability.timeSlots
+                        .filter(slot => slot.available)
+                        .slice(0, 6)
+                        .map((timeSlot) => (
+                        <div
+                          key={timeSlot.id}
+                          className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors"
+                        >
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 text-muted mr-3" />
+                            <div>
+                              <div className="font-medium text-secondary">{timeSlot.date}</div>
+                              <div className="text-sm text-muted">{timeSlot.startTime} - {timeSlot.endTime}</div>
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => handleTimeSlotSelect(timeSlot.id)}
+                            className="bg-primary hover:bg-blue-700 text-white"
+                            data-testid={`button-book-${timeSlot.id}`}
+                          >
+                            Request this time
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-muted text-center">
+                      <Clock className="inline mr-1 h-4 w-4" />
+                      Schedule an inspection by contacting {inspector.displayName} directly
+                    </p>
+                  </div>
+                )}
+
+                {/* Booking Dialog */}
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Request Inspection</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmitBooking)} className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-booking-name" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input type="email" {...field} data-testid="input-booking-email" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone Number</FormLabel>
+                              <FormControl>
+                                <Input {...field} data-testid="input-booking-phone" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Property Address</FormLabel>
+                              <FormControl>
+                                <Input {...field} data-testid="input-booking-address" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="cityZip"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City & ZIP Code</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="e.g., San Francisco, CA 94102" data-testid="input-booking-cityzip" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="propertyType"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Property Type</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger data-testid="select-booking-property-type">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="House">House</SelectItem>
+                                    <SelectItem value="Townhome">Townhome</SelectItem>
+                                    <SelectItem value="Condo">Condo</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="beds"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Bedrooms</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-booking-beds" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="baths"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Bathrooms</FormLabel>
+                                <FormControl>
+                                  <Input {...field} data-testid="input-booking-baths" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="sqft"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Square Feet (optional)</FormLabel>
+                              <FormControl>
+                                <Input {...field} data-testid="input-booking-sqft" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="notes"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Additional Notes (optional)</FormLabel>
+                              <FormControl>
+                                <Textarea {...field} rows={3} data-testid="textarea-booking-notes" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex justify-end space-x-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setDialogOpen(false)}
+                            data-testid="button-booking-cancel"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-primary hover:bg-blue-700"
+                            data-testid="button-booking-submit"
+                          >
+                            Request Inspection
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           </div>

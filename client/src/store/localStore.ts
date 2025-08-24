@@ -47,6 +47,13 @@ export interface InspectorProfile {
   availability?: {
     nextAvailable: string;
     responseTime: string;
+    timeSlots?: Array<{
+      id: string;
+      date: string;
+      startTime: string;
+      endTime: string;
+      available: boolean;
+    }>;
   };
   contact?: {
     phone: string;
@@ -195,6 +202,85 @@ export function useLocalStore() {
     );
   };
 
+  // Create booking request from time slot
+  const createBookingFromTimeSlot = (
+    timeSlotId: string,
+    inspectorId: string,
+    clientData: {
+      name: string;
+      email: string;
+      phone: string;
+      address: string;
+      cityZip: string;
+      propertyType: 'House' | 'Townhome' | 'Condo';
+      beds: number;
+      baths: number;
+      sqft?: number;
+      notes?: string;
+    }
+  ) => {
+    // Find the inspector and time slot
+    const inspector = getInspectorProfileById(inspectorId);
+    const timeSlot = inspector?.availability?.timeSlots?.find(slot => slot.id === timeSlotId);
+    
+    if (!inspector || !timeSlot) {
+      throw new Error('Inspector or time slot not found');
+    }
+
+    // Create the request
+    const newRequest: Request = {
+      id: `req_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      status: 'open',
+      client: {
+        name: clientData.name,
+        email: clientData.email,
+        phone: clientData.phone
+      },
+      property: {
+        address: clientData.address,
+        cityZip: clientData.cityZip,
+        type: clientData.propertyType,
+        beds: clientData.beds,
+        baths: clientData.baths,
+        sqft: clientData.sqft
+      },
+      schedule: {
+        preferredDate: `${timeSlot.date} ${timeSlot.startTime}-${timeSlot.endTime}`
+      },
+      notes: clientData.notes || `Booking request for ${timeSlot.date} ${timeSlot.startTime}-${timeSlot.endTime}`,
+      interestCount: 1,
+      interestedInspectorIds: [inspectorId]
+    };
+
+    // Add the request
+    setStore(prev => ({
+      ...prev,
+      requests: [newRequest, ...prev.requests]
+    }));
+
+    // Mark time slot as unavailable
+    setStore(prev => ({
+      ...prev,
+      allInspectorProfiles: prev.allInspectorProfiles.map(profile => {
+        if (profile.id === inspectorId && profile.availability?.timeSlots) {
+          return {
+            ...profile,
+            availability: {
+              ...profile.availability,
+              timeSlots: profile.availability.timeSlots.map(slot =>
+                slot.id === timeSlotId ? { ...slot, available: false } : slot
+              )
+            }
+          };
+        }
+        return profile;
+      })
+    }));
+
+    return newRequest.id;
+  };
+
   return {
     requests: store.requests,
     inspectorProfile: store.inspectorProfile,
@@ -207,6 +293,7 @@ export function useLocalStore() {
     getInspectorProfileById,
     getRequestById,
     getMyInterests,
-    clearAllData
+    clearAllData,
+    createBookingFromTimeSlot
   };
 }
