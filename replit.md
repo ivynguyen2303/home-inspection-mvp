@@ -1,6 +1,6 @@
 # Overview
 
-This is a home inspector marketplace web application called "InspectNow" that helps users find and book licensed home inspectors in their area. The application features a modern React frontend with a clean, professional design and an Express.js backend. Users can search for inspectors by location, view detailed inspector profiles with ratings and specialties, and see availability for booking appointments.
+This is a fully functional home inspector marketplace web application called "InspectNow" that connects users with licensed home inspectors. The application features dual functionality: a client-facing directory for finding inspectors and an inspector-facing dashboard for managing requests. The system includes complete authentication with user roles (client/inspector), protected routes, and a live system where inspector signups immediately appear in the client directory. Users can create accounts, inspectors can manage profiles, and the platform facilitates real connections between clients and inspectors.
 
 # User Preferences
 
@@ -24,10 +24,10 @@ Preferred communication style: Simple, everyday language.
 - **API Structure**: RESTful API design with /api prefix routing
 
 ## Data Layer
-- **ORM**: Drizzle ORM configured for PostgreSQL with type-safe database operations
-- **Schema**: Defined in shared directory for type consistency between frontend and backend
-- **Database**: PostgreSQL (configured but not yet implemented - currently using memory storage)
-- **Migrations**: Drizzle Kit for database schema management
+- **Storage**: LocalStorage-based system with centralized inspector profile management
+- **Schema**: TypeScript interfaces for type safety between frontend components
+- **Real-time Updates**: Inspector profiles created during signup immediately appear in client directory
+- **Data Structure**: Separate storage for user accounts, inspector profiles, and service requests
 
 ## Design System
 - **Component Library**: Custom implementation built on Radix UI primitives
@@ -67,5 +67,8 @@ Preferred communication style: Simple, everyday language.
 - **Development**: Replit-specific plugins for enhanced development experience
 
 ## Data Source
-- **Inspector Data**: Static JSON file containing inspector profiles, ratings, availability, and contact information
-- **Images**: Unsplash for inspector profile photos
+- **Inspector Data**: Live system where inspector accounts create real profiles that appear in client directory
+- **Profile Management**: Inspectors can customize their profiles, specialties, service areas, and pricing
+- **User-Generated Content**: All inspector profiles come from actual user signups with customizable details
+- **Demo Accounts**: Available for testing (client_demo@example.com / inspector_demo@example.com with DemoPass123)
+- **Images**: Randomly assigned Unsplash photos for new inspector profiles

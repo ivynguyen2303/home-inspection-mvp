@@ -5,16 +5,47 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Briefcase, MapPin, DollarSign, Calendar } from "lucide-react";
-import { mockInspectors, type Inspector } from "@/data/mockInspectors";
+import { useLocalStore, type InspectorProfile } from "@/store/localStore";
+import { mockInspectors } from "@/data/mockInspectors";
 
 
 export default function Inspectors() {
-  const [inspectors, setInspectors] = useState<Inspector[]>([]);
+  const [inspectors, setInspectors] = useState<InspectorProfile[]>([]);
+  const { getAllInspectorProfiles } = useLocalStore();
 
   useEffect(() => {
-    // Load mock inspector data
-    setInspectors(mockInspectors.inspectors);
-  }, []);
+    // Load real inspector profiles from signup + some demo data
+    const realProfiles = getAllInspectorProfiles();
+    const allProfiles = [...realProfiles];
+    
+    // Add mock data if no real inspectors exist yet for demo purposes
+    if (realProfiles.length === 0) {
+      const mockProfiles = mockInspectors.inspectors.map(mock => ({
+        id: mock.id,
+        displayName: mock.name,
+        serviceAreas: mock.serviceAreas,
+        specialties: mock.specialties,
+        basePrice: mock.basePrice,
+        email: mock.contact.email,
+        phone: mock.contact.phone,
+        location: mock.location,
+        bio: mock.bio,
+        yearsExperience: mock.yearsExperience,
+        certifications: mock.certifications,
+        rating: mock.rating,
+        reviewCount: mock.reviewCount,
+        completedInspections: mock.completedInspections,
+        image: mock.image,
+        verified: mock.verified,
+        availability: mock.availability,
+        contact: mock.contact,
+        insurance: mock.insurance
+      }));
+      allProfiles.push(...mockProfiles);
+    }
+    
+    setInspectors(allProfiles);
+  }, [getAllInspectorProfiles]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -59,24 +90,24 @@ export default function Inspectors() {
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4 mb-4">
                   <img 
-                    src={inspector.image} 
-                    alt={`${inspector.name} Profile Photo`} 
+                    src={inspector.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face'} 
+                    alt={`${inspector.displayName} Profile Photo`} 
                     className="w-16 h-16 rounded-full object-cover"
                     data-testid={`img-inspector-${inspector.id}`}
                   />
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-secondary" data-testid={`text-inspector-name-${inspector.id}`}>
-                      {inspector.name}
+                      {inspector.displayName}
                     </h3>
                     <p className="text-sm text-muted" data-testid={`text-inspector-location-${inspector.id}`}>
-                      {inspector.location}
+                      {inspector.location || 'San Francisco, CA'}
                     </p>
                     <div className="flex items-center mt-1">
                       <div className="flex">
-                        {renderStars(inspector.rating)}
+                        {renderStars(inspector.rating || 5.0)}
                       </div>
                       <span className="ml-2 text-sm text-muted" data-testid={`text-inspector-rating-${inspector.id}`}>
-                        {inspector.rating} ({inspector.reviewCount} reviews)
+                        {inspector.rating || 5.0} ({inspector.reviewCount || 0} reviews)
                       </span>
                     </div>
                   </div>
@@ -86,7 +117,7 @@ export default function Inspectors() {
                   <div className="flex items-center text-sm text-muted">
                     <Briefcase className="w-4 h-4 mr-2" />
                     <span data-testid={`text-inspector-experience-${inspector.id}`}>
-                      {inspector.yearsExperience} years experience
+                      {inspector.yearsExperience || 1} years experience
                     </span>
                   </div>
                   <div className="flex items-center text-sm text-muted">
@@ -105,7 +136,7 @@ export default function Inspectors() {
                   <div className="flex items-center text-sm text-accent">
                     <Calendar className="w-4 h-4 mr-2" />
                     <span data-testid={`text-inspector-availability-${inspector.id}`}>
-                      {inspector.availability.nextAvailable}
+                      {inspector.availability?.nextAvailable || 'This week'}
                     </span>
                   </div>
                 </div>

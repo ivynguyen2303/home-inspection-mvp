@@ -132,13 +132,46 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // If inspector role, initialize inspector profile
       if (data.role === 'inspector') {
-        updateInspectorProfile({
+        const inspectorProfile = {
           id: user.id,
           displayName: data.name || user.email.split('@')[0],
-          serviceAreas: [],
+          serviceAreas: ['San Francisco Bay Area'],
           specialties: [],
-          basePrice: 400
-        });
+          basePrice: 400,
+          email: user.email,
+          phone: data.phone,
+          location: 'San Francisco, CA',
+          bio: `Professional home inspector with expertise in residential property assessments.`,
+          yearsExperience: 1,
+          certifications: ['State Licensed'],
+          rating: 5.0,
+          reviewCount: 0,
+          completedInspections: 0,
+          image: `https://images.unsplash.com/photo-${Math.random() > 0.5 ? '1560250097' : '1472099645'}-0b93528c311a?w=400&h=400&fit=crop&crop=face`,
+          verified: true,
+          availability: {
+            nextAvailable: 'This week',
+            responseTime: 'Within 4 hours'
+          },
+          contact: {
+            phone: data.phone || '(555) 123-4567',
+            email: user.email
+          },
+          insurance: '$1M Professional Liability'
+        };
+        updateInspectorProfile(inspectorProfile);
+        // Also add to the public directory
+        try {
+          const storeData = localStorage.getItem('inspect_now_store');
+          if (storeData) {
+            const store = JSON.parse(storeData);
+            store.allInspectorProfiles = store.allInspectorProfiles || [];
+            store.allInspectorProfiles = [...store.allInspectorProfiles.filter((p: any) => p.id !== inspectorProfile.id), inspectorProfile];
+            localStorage.setItem('inspect_now_store', JSON.stringify(store));
+          }
+        } catch (error) {
+          console.error('Error adding inspector profile:', error);
+        }
       }
 
       // Create session
