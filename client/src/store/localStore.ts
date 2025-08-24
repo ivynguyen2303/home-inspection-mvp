@@ -81,6 +81,7 @@ const DEFAULT_INSPECTOR_PROFILE: InspectorProfile = {
 
 const STORAGE_KEY = 'inspect_now_store';
 const SHARED_REQUESTS_KEY = 'inspect_now_shared_requests'; // Shared across all users
+const SHARED_PROFILES_KEY = 'inspect_now_shared_profiles'; // Shared across all users
 
 // Helper function to get user-specific storage key for profiles only
 function getUserStorageKey(userEmail?: string): string {
@@ -132,29 +133,38 @@ export function useLocalStore() {
       console.error('Error loading shared requests:', error);
     }
     
-    // Load user-specific data (profiles)
-    let userProfiles = { inspectorProfile: DEFAULT_INSPECTOR_PROFILE, allInspectorProfiles: [] };
+    // Load shared inspector profiles (accessible to all users)
+    let sharedProfiles = [];
+    try {
+      const savedProfiles = localStorage.getItem(SHARED_PROFILES_KEY);
+      if (savedProfiles) {
+        const parsed = JSON.parse(savedProfiles);
+        sharedProfiles = Array.isArray(parsed) ? parsed : [];
+      }
+    } catch (error) {
+      console.error('Error loading shared profiles:', error);
+    }
+    
+    // Load user-specific inspector profile (only current user's own profile)
+    let userInspectorProfile = DEFAULT_INSPECTOR_PROFILE;
     try {
       const savedUserData = localStorage.getItem(userStorageKey);
       
       if (savedUserData) {
         const parsed = JSON.parse(savedUserData);
         
-        if (parsed.inspectorProfile && parsed.allInspectorProfiles) {
-          userProfiles = {
-            inspectorProfile: parsed.inspectorProfile,
-            allInspectorProfiles: parsed.allInspectorProfiles
-          };
+        if (parsed.inspectorProfile) {
+          userInspectorProfile = parsed.inspectorProfile;
         }
       }
     } catch (error) {
-      console.error('🏪 [STORE INIT] Error loading user data:', error);
+      console.error('Error loading user data:', error);
     }
     
     return {
       requests: sharedRequests,
-      inspectorProfile: userProfiles.inspectorProfile,
-      allInspectorProfiles: userProfiles.allInspectorProfiles
+      inspectorProfile: userInspectorProfile,
+      allInspectorProfiles: sharedProfiles
     };
   });
 
@@ -215,10 +225,13 @@ export function useLocalStore() {
       const requestsJson = JSON.stringify(store.requests);
       localStorage.setItem(SHARED_REQUESTS_KEY, requestsJson);
       
-      // Save user-specific data (profiles only)
+      // Save shared inspector profiles (accessible to all users)
+      const profilesJson = JSON.stringify(store.allInspectorProfiles);
+      localStorage.setItem(SHARED_PROFILES_KEY, profilesJson);
+      
+      // Save user-specific data (only current user's own profile)
       const userData = {
-        inspectorProfile: store.inspectorProfile,
-        allInspectorProfiles: store.allInspectorProfiles
+        inspectorProfile: store.inspectorProfile
       };
       const userDataJson = JSON.stringify(userData);
       localStorage.setItem(userStorageKey, userDataJson);
