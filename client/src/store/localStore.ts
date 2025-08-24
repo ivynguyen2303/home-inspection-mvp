@@ -129,16 +129,19 @@ export function useLocalStore() {
       interestedInspectorIds: []
     };
     console.log('Created new request:', newRequest);
+    console.log('Current store before update:', store);
     
     setStore(prev => {
+      console.log('setStore prev state:', prev);
       const updated = {
         ...prev,
         requests: [newRequest, ...prev.requests]
       };
-      console.log('Updated store:', updated);
+      console.log('setStore new state:', updated);
       return updated;
     });
     
+    console.log('Store after setStore call:', store);
     return newRequest.id;
   };
 
