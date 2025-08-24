@@ -120,7 +120,6 @@ export function useLocalStore() {
   }, [store]);
 
   const addRequest = (requestData: Omit<Request, 'id' | 'createdAt' | 'interestCount' | 'interestedInspectorIds'>) => {
-    console.log('addRequest called with:', requestData);
     const newRequest: Request = {
       ...requestData,
       id: `req_${Date.now()}`,
@@ -128,55 +127,11 @@ export function useLocalStore() {
       interestCount: 0,
       interestedInspectorIds: []
     };
-    console.log('Created new request:', newRequest);
-    console.log('Current store before update:', store);
     
-    // Create updated store data
-    const updatedStore = {
-      ...store,
-      requests: [newRequest, ...store.requests]
-    };
-    console.log('Manual updated store:', updatedStore);
-    
-    // Save directly to localStorage FIRST
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedStore));
-      console.log('Saved to localStorage successfully');
-    } catch (error) {
-      console.error('Failed to save to localStorage:', error);
-    }
-    
-    // Try multiple React state update approaches
-    console.log('Trying approach 1: Direct object');
-    setStore(updatedStore);
-    
-    setTimeout(() => {
-      console.log('Trying approach 2: Functional update');
-      setStore(prev => {
-        console.log('Functional update prev:', prev);
-        const result = { ...prev, requests: [newRequest, ...prev.requests] };
-        console.log('Functional update result:', result);
-        return result;
-      });
-    }, 10);
-    
-    setTimeout(() => {
-      console.log('Trying approach 3: Force re-read from localStorage');
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          console.log('Re-read from localStorage:', parsed);
-          setStore(parsed);
-        }
-      } catch (error) {
-        console.error('Failed to re-read:', error);
-      }
-    }, 50);
-    
-    setTimeout(() => {
-      console.log('Final store check:', store);
-    }, 200);
+    setStore(prev => ({
+      ...prev,
+      requests: [newRequest, ...prev.requests]
+    }));
     
     return newRequest.id;
   };
@@ -385,11 +340,7 @@ export function useLocalStore() {
 
   // Get requests created by a specific client (by email)
   const getClientRequests = (clientEmail: string) => {
-    console.log('getClientRequests - filtering for email:', clientEmail);
-    console.log('getClientRequests - all requests:', store.requests);
-    const filtered = store.requests.filter(req => req.client.email === clientEmail);
-    console.log('getClientRequests - filtered results:', filtered);
-    return filtered;
+    return store.requests.filter(req => req.client.email === clientEmail);
   };
 
   // Update a request (only if it belongs to the client)
