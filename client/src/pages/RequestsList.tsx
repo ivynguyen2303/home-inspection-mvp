@@ -20,16 +20,17 @@ export default function RequestsList() {
     return requests
       .filter(req => req.status === 'open')
       .filter(req => {
-        // Show open requests to all inspectors, and client requests only to target inspector
+        // Show open requests to all inspectors, but HIDE client requests from non-target inspectors
         if (req.type === 'open_request') {
           return true; // All inspectors can see open requests
         } else if (req.type === 'client_request') {
-          // Bulletproof filtering: client requests only for the targeted inspector
-          return req.targetInspectorId && 
-                 inspectorProfile.id && 
-                 String(req.targetInspectorId) === String(inspectorProfile.id);
+          // Client requests should ONLY be visible to the targeted inspector
+          const isTargetedToMe = req.targetInspectorId && 
+                                inspectorProfile.id && 
+                                String(req.targetInspectorId) === String(inspectorProfile.id);
+          return isTargetedToMe;
         }
-        return true;
+        return false; // Hide any other request types
       })
       .filter(req => {
         if (cityFilter) {
