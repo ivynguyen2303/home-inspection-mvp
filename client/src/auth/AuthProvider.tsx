@@ -17,6 +17,7 @@ import {
   findUserByEmail,
   addUser,
   updateUser,
+  deleteUser,
   hashPassword,
   generateUserId,
   clearAllUsers
@@ -231,12 +232,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const deleteAccount = async (): Promise<void> => {
+    if (!authState.user) {
+      throw new Error('No user logged in');
+    }
+
+    try {
+      const userId = authState.user.id;
+      
+      // Remove user from auth storage
+      deleteUser(userId);
+      
+      // Clear session
+      setSession(null);
+      setAuthState({ user: null, loading: false });
+
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been permanently deleted.",
+      });
+
+      // Redirect to landing page
+      setLocation('/');
+    } catch (error) {
+      toast({
+        title: "Deletion Failed",
+        description: error instanceof Error ? error.message : "Failed to delete account",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const contextValue: AuthContextType = {
     ...authState,
     login,
     signup,
     logout,
-    updateProfile
+    updateProfile,
+    deleteAccount
   };
 
   return (

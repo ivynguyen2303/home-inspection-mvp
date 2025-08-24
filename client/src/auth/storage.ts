@@ -85,6 +85,12 @@ export function generateUserId(): string {
 }
 
 // Clear all user data function
+export function deleteUser(userId: string): void {
+  const users = getUsers();
+  const updatedUsers = users.filter(user => user.id !== userId);
+  localStorage.setItem(USERS_KEY, JSON.stringify(updatedUsers));
+}
+
 export function clearAllUsers(): void {
   localStorage.removeItem(USERS_KEY);
   localStorage.removeItem(SESSION_KEY);

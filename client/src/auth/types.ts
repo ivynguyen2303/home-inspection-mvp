@@ -38,4 +38,5 @@ export interface AuthContextType extends AuthState {
   signup: (data: SignupData) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<Pick<User, 'name' | 'phone'>>) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
