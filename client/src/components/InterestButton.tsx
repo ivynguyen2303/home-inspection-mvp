@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, HeartOff } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useLocalStore } from '@/store/localStore';
 
 interface InterestButtonProps {
@@ -32,11 +32,7 @@ export function InterestButton({ requestId, interestCount, className }: Interest
         }`}
         data-testid={`button-interest-${requestId}`}
       >
-        {isInterested ? (
-          <Heart className="w-4 h-4 fill-current" />
-        ) : (
-          <HeartOff className="w-4 h-4" />
-        )}
+        <Heart className={`w-4 h-4 ${isInterested ? 'fill-current' : ''}`} />
         <span>{isInterested ? 'Interested' : 'I\'m Interested'}</span>
       </Button>
       {interestCount > 0 && (
