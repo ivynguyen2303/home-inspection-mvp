@@ -92,7 +92,7 @@ export function useLocalStore() {
     };
   });
 
-  // Load example requests on first run
+  // Load example requests on first run - only for demo accounts or if no real requests exist
   useEffect(() => {
     if (store.requests.length === 0 && mockRequests.length > 0) {
       setStore(prev => ({ ...prev, requests: mockRequests }));

@@ -6,49 +6,58 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Briefcase, MapPin, DollarSign, Calendar } from "lucide-react";
 import { useLocalStore, type InspectorProfile } from "@/store/localStore";
+import { useAuth } from "@/auth/AuthProvider";
 import { mockInspectors } from "@/data/mockInspectors";
 
 
 export default function Inspectors() {
   const [inspectors, setInspectors] = useState<InspectorProfile[]>([]);
   const { getAllInspectorProfiles } = useLocalStore();
+  const { user } = useAuth();
 
   const loadInspectors = () => {
-    // Load real inspector profiles from signup + some demo data
+    // Load real inspector profiles from signup
     const realProfiles = getAllInspectorProfiles();
     
-    // Always include mock data for demo purposes, then add real profiles
-    const mockProfiles = mockInspectors.inspectors.map(mock => ({
-      id: mock.id,
-      displayName: mock.name,
-      serviceAreas: mock.serviceAreas,
-      specialties: mock.specialties,
-      basePrice: mock.basePrice,
-      email: mock.contact.email,
-      phone: mock.contact.phone,
-      location: mock.location,
-      bio: mock.bio,
-      yearsExperience: mock.yearsExperience,
-      certifications: mock.certifications,
-      rating: mock.rating,
-      reviewCount: mock.reviewCount,
-      completedInspections: mock.completedInspections,
-      image: mock.image,
-      verified: mock.verified,
-      availability: mock.availability,
-      contact: mock.contact,
-      insurance: mock.insurance
-    }));
+    // Check if current user is a demo account
+    const isDemoAccount = user?.email === 'client_demo@example.com';
     
-    // Combine mock profiles with real profiles, ensuring no duplicates
-    const allProfiles = [...mockProfiles, ...realProfiles];
-    
-    setInspectors(allProfiles);
+    if (isDemoAccount) {
+      // For demo accounts, show mock data + any real profiles
+      const mockProfiles = mockInspectors.inspectors.map(mock => ({
+        id: mock.id,
+        displayName: mock.name,
+        serviceAreas: mock.serviceAreas,
+        specialties: mock.specialties,
+        basePrice: mock.basePrice,
+        email: mock.contact.email,
+        phone: mock.contact.phone,
+        location: mock.location,
+        bio: mock.bio,
+        yearsExperience: mock.yearsExperience,
+        certifications: mock.certifications,
+        rating: mock.rating,
+        reviewCount: mock.reviewCount,
+        completedInspections: mock.completedInspections,
+        image: mock.image,
+        verified: mock.verified,
+        availability: mock.availability,
+        contact: mock.contact,
+        insurance: mock.insurance
+      }));
+      
+      // Combine mock profiles with real profiles for demo
+      const allProfiles = [...mockProfiles, ...realProfiles];
+      setInspectors(allProfiles);
+    } else {
+      // For real accounts, only show real inspector profiles
+      setInspectors(realProfiles);
+    }
   };
 
   useEffect(() => {
     loadInspectors();
-  }, []);
+  }, [user?.email]); // Re-load when user changes
 
   // Refresh inspectors when storage changes (to catch new signups)
   useEffect(() => {
@@ -105,8 +114,21 @@ export default function Inspectors() {
         </div>
 
         {/* Inspectors Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {inspectors.map((inspector) => (
+        {inspectors.length === 0 && !user?.email?.includes('demo') ? (
+          <div className="text-center py-12">
+            <h2 className="text-xl font-semibold text-secondary mb-4">No Inspectors Found</h2>
+            <p className="text-muted mb-6">
+              There are currently no registered inspectors in your area. Be the first inspector to join!
+            </p>
+            <Link href="/signup">
+              <Button className="bg-primary hover:bg-blue-700 text-white">
+                Sign Up as Inspector
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {inspectors.map((inspector) => (
             <Card key={inspector.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow" data-testid={`card-inspector-${inspector.id}`}>
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4 mb-4">
@@ -173,7 +195,8 @@ export default function Inspectors() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

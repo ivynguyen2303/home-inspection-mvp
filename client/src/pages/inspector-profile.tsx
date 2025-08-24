@@ -17,6 +17,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useLocalStore, type InspectorProfile } from "@/store/localStore";
+import { useAuth } from "@/auth/AuthProvider";
 import { mockInspectors } from "@/data/mockInspectors";
 
 
@@ -25,6 +26,7 @@ export default function InspectorProfile() {
   const [inspector, setInspector] = useState<InspectorProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { getInspectorProfileById } = useLocalStore();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!match || !params?.id) return;
@@ -32,8 +34,11 @@ export default function InspectorProfile() {
     // Try to find real inspector profile first
     let foundInspector = getInspectorProfileById(params.id);
     
-    // Fall back to mock data if no real profile exists
-    if (!foundInspector) {
+    // Check if current user is a demo account - only show mock data for demo accounts
+    const isDemoAccount = user?.email === 'client_demo@example.com';
+    
+    // Fall back to mock data only if no real profile exists AND user is demo account
+    if (!foundInspector && isDemoAccount) {
       const mockInspector = mockInspectors.inspectors.find(insp => insp.id === params.id);
       if (mockInspector) {
         foundInspector = {
@@ -62,7 +67,7 @@ export default function InspectorProfile() {
     
     setInspector(foundInspector || null);
     setLoading(false);
-  }, [match, params?.id, getInspectorProfileById]);
+  }, [match, params?.id, getInspectorProfileById, user?.email]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -134,7 +139,7 @@ export default function InspectorProfile() {
                     </p>
                     <div className="flex items-center mb-3">
                       <div className="flex mr-2">
-                        {renderStars(inspector.rating)}
+                        {renderStars(inspector.rating || 5.0)}
                       </div>
                       <span className="text-secondary font-medium" data-testid="text-inspector-rating">
                         {inspector.rating || 5.0}
@@ -197,18 +202,18 @@ export default function InspectorProfile() {
                 <h2 className="text-2xl font-semibold text-secondary mb-6" data-testid="text-availability-title">Availability</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="text-center p-6 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="text-2xl font-bold text-green-700 mb-2">{inspector.availability.nextAvailable}</div>
+                    <div className="text-2xl font-bold text-green-700 mb-2">{inspector.availability?.nextAvailable || 'This week'}</div>
                     <div className="text-green-600">Next Available</div>
                   </div>
                   <div className="text-center p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-700 mb-2">{inspector.availability.responseTime}</div>
+                    <div className="text-2xl font-bold text-blue-700 mb-2">{inspector.availability?.responseTime || 'Within 4 hours'}</div>
                     <div className="text-blue-600">Response Time</div>
                   </div>
                 </div>
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-muted text-center">
                     <Clock className="inline mr-1 h-4 w-4" />
-                    Schedule an inspection by contacting {inspector.name} directly
+                    Schedule an inspection by contacting {inspector.displayName} directly
                   </p>
                 </div>
               </CardContent>

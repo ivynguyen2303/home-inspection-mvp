@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initAuth();
   }, []);
 
-  const login = async (credentials: LoginCredentials): Promise<void> => {
+  const login = async (credentials: LoginCredentials): Promise<User> => {
     try {
       const user = findUserByEmail(credentials.email);
       if (!user) {
